@@ -21,8 +21,7 @@
       position: relative;
       overflow: hidden;
     }
-
-    /* Background grid */
+    
     body::before {
       content: '';
       position: fixed;
@@ -34,7 +33,6 @@
       pointer-events: none;
     }
 
-    /* Big decorative text */
     body::after {
       content: 'PULSE';
       position: fixed;
