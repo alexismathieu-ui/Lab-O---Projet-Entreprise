@@ -1,23 +1,43 @@
 const express = require("express");
+const bcrypt = require("bcrypt");
+
 const app = express();
+app.use(express.json());
 
-app.use(express.json()); // pour lire le JSON
+// "fake database"
+let users = [];
 
-app.listen(3000, () => {
-  console.log("Serveur lancé sur http://localhost:3000");
+// REGISTER
+app.post("/register", async (req, res) => {
+  const { email, password } = req.body;
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  users.push({
+    email,
+    password: hashedPassword,
+  });
+
+  res.json({ message: "User created" });
 });
 
-app.get("/photos", (req, res) => {
-  res.json([
-    { id: 1, liked: false },
-    { id: 2, liked: true },
-  ]);
+// LOGIN
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  const user = users.find((u) => u.email === email);
+
+  if (!user) {
+    return res.status(400).json({ message: "User not found" });
+  }
+
+  const valid = await bcrypt.compare(password, user.password);
+
+  if (!valid) {
+    return res.status(400).json({ message: "Wrong password" });
+  }
+
+  res.json({ message: "Login success" });
 });
 
-app.post("/like", (req, res) => {
-  const { id } = req.body;
-
-  console.log("Photo likée:", id);
-
-  res.json({ success: true });
-});
+app.listen(3000, () => console.log("Server running"));
