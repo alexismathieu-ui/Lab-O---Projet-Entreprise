@@ -4,10 +4,8 @@ const bcrypt = require("bcrypt");
 const app = express();
 app.use(express.json());
 
-// "fake database"
 let users = [];
 
-// REGISTER
 app.post("/register", async (req, res) => {
   const { email, password } = req.body;
 
@@ -21,7 +19,6 @@ app.post("/register", async (req, res) => {
   res.json({ message: "User created" });
 });
 
-// LOGIN
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
 

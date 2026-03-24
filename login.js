@@ -9,7 +9,6 @@ fetch("http://localhost:3000/login", {
   .then((res) => res.json())
   .then((data) => {
     if (data.message === "Login success") {
-      localStorage.setItem("user", emailInput.value); // 🔥 ICI
-      window.location.href = "index.html"; // redirection
+      localStorage.setItem("user", emailInput.value);
     }
   });
