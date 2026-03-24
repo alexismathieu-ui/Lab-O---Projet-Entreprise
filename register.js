@@ -1,7 +1,14 @@
-const user = localStorage.getItem("user");
+fetch("http://localhost:3000/register", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    email: emailInput.value,
+    password: passwordInput.value,
+  }),
+})
+  .then((res) => res.json())
+  .then((data) => {
+    alert(data.message);
 
-if (user) {
-  console.log("Connecté en tant que :", user);
-
-  document.getElementById("userEmail").textContent = user;
-}
+    window.location.href = "login.html";
+  });
