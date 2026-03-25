@@ -1,38 +1,41 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Pulse — Bienvenue</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="stylesheet" href="style.css"/>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-</head>
-<body>
-  <div class="card">
-    <div class="logo">
-      <div class="logo-dot"></div>
-      <span class="logo-text">LAB'O</span>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pulse — Bienvenue</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="card">
+      <div class="logo">
+        <div class="logo-dot"></div>
+        <span class="logo-text">LAB'O</span>
+      </div>
+
+      <p class="welcome-label">Connecté en tant que</p>
+      <div class="username" id="username">—</div>
+      <p class="tagline">Bienvenue dans la communauté Lab'O</p>
+
+      <div class="divider"></div>
+      <a href="index.html">← Se déconnecter</a>
     </div>
 
-    <p class="welcome-label">Connecté en tant que</p>
-    <div class="username" id="username">—</div>
-    <p class="tagline">Bienvenue dans la communauté Lab'O</p>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const user = params.get("user");
 
-    <div class="divider"></div>
-    <a href="index.html">← Se déconnecter</a>
-  </div>
-
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const user = params.get('user');
-
-    if (user) {
-      document.getElementById('username').textContent = user;
-      document.title = 'Pulse — ' + user;
-    } else {
-      window.location.href = 'index.html';
-    }
-  </script>
-</body>
+      if (user) {
+        document.getElementById("username").textContent = user;
+        document.title = "Pulse — " + user;
+      } else {
+        window.location.href = "index.html";
+      }
+    </script>
+  </body>
 </html>
