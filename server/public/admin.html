@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pulse — Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="admin.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+  <script src="/socket.io/socket.io.js"></script>
+  
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span class="dot"></span><span>PULSE ADMIN</span>
+    </div>
+
+    <div class="sidebar-section">Tableau de bord</div>
+    <div class="nav-item active" onclick="showPanel('dashboard')">
+      <span class="icon">⚡</span> Vue d'ensemble
+    </div>
+
+    <div class="sidebar-section">Contenu</div>
+    <div class="nav-item" onclick="showPanel('posts')">
+      <span class="icon">💬</span> Posts
+      <span class="badge" id="badge-posts">0</span>
+    </div>
+    <div class="nav-item" onclick="showPanel('annonces')">
+      <span class="icon">📌</span> Annonces
+      <span class="badge" id="badge-annonces">0</span>
+    </div>
+    <div class="nav-item" onclick="showPanel('medias')">
+      <span class="icon">🗂</span> Médias
+    </div>
+
+    <div class="sidebar-section">Communauté</div>
+    <div class="nav-item" onclick="showPanel('coworkers')">
+      <span class="icon">👥</span> Trombinoscope
+    </div>
+    <div class="nav-item" onclick="showPanel('question')">
+      <span class="icon">❓</span> Question / Chat
+    </div>
+
+    <div class="sidebar-section">Contrôle</div>
+    <div class="nav-item" onclick="showPanel('direct')">
+      <span class="icon">🎛</span> Contrôle direct
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <strong id="sidebar-email">admin</strong>
+        Administrateur
+      </div>
+      <button class="btn-logout" onclick="logout()">Se déconnecter</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <h1 id="panel-title">Vue d'ensemble</h1>
+      <div class="topbar-actions" id="topbar-actions"></div>
+    </div>
+
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="panel active" id="panel-dashboard">
+        <div class="stats-grid">
+          <div class="stat-card red">
+            <div class="stat-value" id="stat-posts">—</div>
+            <div class="stat-label">Posts en attente</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-annonces">—</div>
+            <div class="stat-label">Annonces en attente</div>
+          </div>
+          <div class="stat-card green">
+            <div class="stat-value" id="stat-medias">—</div>
+            <div class="stat-label">Médias dans la boucle</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-coworkers">—</div>
+            <div class="stat-label">Coworkers</div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:1rem">
+          <div class="card-header"><span class="card-title">🔄 Boucle d'affichage (Loop Engine)</span></div>
+          <div class="card-body">
+            <div class="loop-monitor">
+              <div class="loop-label">Contenu actuellement dans la boucle</div>
+              <div class="loop-items" id="loop-items">
+                <span style="color:var(--sidebar-muted);font-size:.8rem">Chargement...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><span class="card-title">⚡ Actions rapides</span></div>
+          <div class="card-body" style="display:flex;gap:.6rem;flex-wrap:wrap">
+            <button class="btn btn-danger" onclick="clearWall()">🗑 Vider le mur</button>
+            <button class="btn btn-secondary" onclick="showPanel('posts')">📋 Modérer les posts</button>
+            <button class="btn btn-secondary" onclick="showPanel('medias')">📁 Gérer les médias</button>
+            <button class="btn btn-primary" onclick="showPanel('direct')">🚨 Alerte prioritaire</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- POSTS -->
+      <div class="panel" id="panel-posts">
+        <div class="tabs">
+          <div class="tab active" onclick="filterPosts('pending',this)">En attente</div>
+          <div class="tab" onclick="filterPosts('approved',this)">Approuvés</div>
+          <div class="tab" onclick="filterPosts('rejected',this)">Rejetés</div>
+          <div class="tab" onclick="filterPosts('',this)">Tous</div>
+        </div>
+        <div class="card">
+          <div class="card-body" style="padding:0" id="posts-list">
+            <div class="empty"><div class="empty-icon">💬</div><p>Aucun post</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ANNONCES -->
+      <div class="panel" id="panel-annonces">
+        <div class="tabs">
+          <div class="tab active" onclick="filterAnnonces('pending',this)">En attente</div>
+          <div class="tab" onclick="filterAnnonces('approved',this)">Approuvées</div>
+          <div class="tab" onclick="filterAnnonces('rejected',this)">Rejetées</div>
+          <div class="tab" onclick="filterAnnonces('',this)">Toutes</div>
+        </div>
+        <div class="card">
+          <div class="card-body" style="padding:0" id="annonces-list">
+            <div class="empty"><div class="empty-icon">📌</div><p>Aucune annonce</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MÉDIAS -->
+      <div class="panel" id="panel-medias">
+        <div style="display:grid;grid-template-columns:1fr 1.5fr;gap:1.5rem;align-items:start">
+          <div class="card">
+            <div class="card-header"><span class="card-title">📤 Uploader un fichier</span></div>
+            <div class="card-body">
+              <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+                <span class="icon">📁</span>
+                <p>Glissez un fichier ici ou <strong>cliquez</strong></p>
+                <p style="margin-top:.4rem;font-size:.7rem">PDF · PNG · JPEG — max 20 Mo</p>
+              </div>
+              <input type="file" id="file-input" accept=".pdf,.png,.jpg,.jpeg" style="display:none" onchange="uploadFile(this)">
+              <div class="form-group" style="margin-top:1rem">
+                <label>Durée d'affichage (secondes)</label>
+                <input type="number" id="upload-duration" value="15" min="5" max="120">
+              </div>
+              <div id="upload-progress" style="display:none;font-size:.8rem;color:var(--muted);margin-top:.5rem">⏳ Upload en cours...</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">🗂 Ordre de la boucle</span>
+              <span style="font-size:.7rem;color:var(--muted)">Glissez pour réordonner</span>
+            </div>
+            <div class="card-body" style="padding:.75rem">
+              <div class="media-list" id="media-list">
+                <div class="empty"><div class="empty-icon">🗂</div><p>Aucun média</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COWORKERS -->
+      <div class="panel" id="panel-coworkers">
+        <div class="coworkers-grid" id="coworkers-grid">
+          <div class="empty" style="grid-column:1/-1"><div class="empty-icon">👥</div><p>Aucun coworker</p></div>
+        </div>
+      </div>
+
+      <!-- QUESTION DU JOUR -->
+      <div class="panel" id="panel-question">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:start">
+          <div class="card">
+            <div class="card-header"><span class="card-title">❓ Question active</span></div>
+            <div class="card-body">
+              <div class="question-box" id="question-current-box">
+                <div class="question-meta">Aucune question active</div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">✏️ Nouvelle question</span></div>
+            <div class="card-body">
+              <div class="form-group">
+                <label>Question du jour</label>
+                <textarea id="new-question" placeholder="Quel est votre projet du moment ?"></textarea>
+              </div>
+              <div class="form-group">
+                <label>Mode d'affichage</label>
+                <select id="question-mode">
+                  <option value="question">Question du jour (lecture seule)</option>
+                  <option value="chat">Chat communautaire (réponses ouvertes)</option>
+                </select>
+              </div>
+              <button class="btn btn-primary" style="width:100%" onclick="saveQuestion()">Publier la question</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTRÔLE DIRECT -->
+      <div class="panel" id="panel-direct">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+          <div class="card">
+            <div class="card-header"><span class="card-title">🚨 Alerte prioritaire</span></div>
+            <div class="card-body">
+              <div id="alert-current" style="margin-bottom:1rem"></div>
+              <div class="form-group">
+                <label>Message d'alerte</label>
+                <textarea id="alert-message" placeholder="⚠️ Fermeture exceptionnelle à 18h..." rows="3"></textarea>
+              </div>
+              <div style="display:flex;gap:.5rem">
+                <button class="btn btn-primary" style="flex:1" onclick="sendAlert()">🚨 Diffuser l'alerte</button>
+                <button class="btn btn-ghost" onclick="clearAlert()">Désactiver</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><span class="card-title">🗑 Contrôle du mur</span></div>
+            <div class="card-body">
+              <p style="font-size:.8rem;color:var(--muted);margin-bottom:1rem;line-height:1.6">Vider le mur supprime instantanément tous les posts approuvés de l'affichage. Les messages restent en base de données.</p>
+              <button class="btn btn-danger" style="width:100%" onclick="clearWall()">🗑 Vider le mur immédiatement</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </main>
+
+  <!-- MODALS -->
+  <div class="modal-bg" id="modal-coworker">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title" id="modal-coworker-title">Ajouter un coworker</span>
+        <button class="modal-close" onclick="closeModal('modal-coworker')">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="coworker-id">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nom complet *</label>
+            <input type="text" id="coworker-name" placeholder="Marie Dupont">
+          </div>
+          <div class="form-group">
+            <label>Entreprise</label>
+            <input type="text" id="coworker-company" placeholder="StartupXYZ">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Étage / Espace</label>
+            <input type="text" id="coworker-floor" placeholder="2ème étage">
+          </div>
+          <div class="form-group">
+            <label>Contact</label>
+            <input type="text" id="coworker-contact" placeholder="email ou tel">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Site web</label>
+          <input type="text" id="coworker-website" placeholder="https://...">
+        </div>
+        <div class="form-group">
+          <label>Bio</label>
+          <textarea id="coworker-bio" placeholder="Quelques mots..." rows="2"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('modal-coworker')">Annuler</button>
+        <button class="btn btn-primary" onclick="saveCoworker()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script src="admin.js"></script>
+</body>
+</html>
