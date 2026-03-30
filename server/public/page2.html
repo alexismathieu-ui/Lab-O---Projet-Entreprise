@@ -27,14 +27,15 @@
     </div>
 
     <script>
-      const params = new URLSearchParams(window.location.search);
-      const user = params.get("user");
+      let user = null;
+      try { user = JSON.parse(localStorage.getItem('pulse_user') || 'null'); } catch(e) {}
 
-      if (user) {
-        document.getElementById("username").textContent = user;
-        document.title = "Pulse — " + user;
+      if (user && user.email) {
+        document.getElementById("username").textContent = user.email;
+        document.title = "Pulse — " + user.email;
       } else {
-        window.location.href = "index.html";
+        localStorage.removeItem('pulse_user');
+        window.location.replace("/");
       }
     </script>
   </body>
