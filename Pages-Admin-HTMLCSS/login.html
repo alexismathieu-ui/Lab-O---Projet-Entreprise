@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login Admin</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Yanone+Kaffeesatz:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* ─── Design Tokens ──────────────────────────────────────────────── */
+      :root {
+        /* Colors — identiques au dashboard */
+        --color-bg: #f8f2eb;
+        --color-red: #e53530;
+        --color-black: #050707;
+        --color-hover: #f99492;
+        --color-placeholder: rgba(30, 30, 30, 0.5);
+
+        /* Typography — même convention que dashboard */
+        --font: "Yanone Kaffeesatz", sans-serif;
+        --fw-bold: 700;
+        --fw-semi: 600;
+        --font-size-field: 36px;
+        --letter-spacing: -0.72px;
+
+        /* Dimensions */
+        --logo-size: 120px;
+        --input-width: 622.645px;
+        --input-height: 60px;
+        --input-padding-l: 19.73px;
+        --btn-w: 229px;
+        --btn-h: 60px;
+        --btn-radius: 10px;
+
+        /* Gaps (from Figma absolute coordinates) */
+        --gap-logo-to-form: 100px;
+        --gap-between-inputs: 80px;
+        --gap-inputs-to-btn: 80px;
+      }
+
+      /* ─── Reset ──────────────────────────────────────────────────────── */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      /* ─── Base ───────────────────────────────────────────────────────── */
+      html,
+      body {
+        height: 100%;
+      }
+
+      body {
+        background-color: var(--color-bg);
+        font-family: var(--font);
+        color: var(--color-black);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+      }
+
+      /* ─── Login Page ─────────────────────────────────────────────────── */
+      .login-page {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      /* ─── Logo ───────────────────────────────────────────────────────── */
+      .login-page__logo {
+        width: var(--logo-size);
+        height: var(--logo-size);
+        flex-shrink: 0;
+        margin-bottom: var(--gap-logo-to-form);
+        object-fit: contain;
+      }
+
+      /* ─── Form ───────────────────────────────────────────────────────── */
+      .login-page__form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      /* ─── Fields wrapper ─────────────────────────────────────────────── */
+      .login-page__fields {
+        display: flex;
+        flex-direction: column;
+        gap: var(--gap-between-inputs);
+        margin-bottom: var(--gap-inputs-to-btn);
+      }
+
+      /* ─── Individual field ───────────────────────────────────────────── */
+      .login-page__field {
+        position: relative;
+        width: var(--input-width);
+        height: var(--input-height);
+      }
+
+      /* L-shaped border via ::before (left) and ::after (bottom) */
+      .login-page__field::before,
+      .login-page__field::after {
+        content: "";
+        position: absolute;
+        background-color: var(--color-red);
+        pointer-events: none;
+      }
+
+      /* Left border */
+      .login-page__field::before {
+        top: 0;
+        left: 0;
+        width: 2px;
+        height: 100%;
+      }
+
+      /* Bottom border */
+      .login-page__field::after {
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+      }
+
+      /* ─── Input ──────────────────────────────────────────────────────── */
+      .login-page__input {
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        border: none;
+        outline: none;
+        padding-left: var(--input-padding-l);
+        padding-right: 16px;
+
+        font-family: var(--font);
+        font-weight: var(--fw-semi);
+        font-size: var(--font-size-field);
+        color: var(--color-black);
+        letter-spacing: var(--letter-spacing);
+        line-height: 1.4;
+      }
+
+      .login-page__input::placeholder {
+        color: var(--color-placeholder);
+      }
+
+      /* ─── Submit button ──────────────────────────────────────────────── */
+      .login-page__btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        width: var(--btn-w);
+        height: var(--btn-h);
+
+        background-color: var(--color-bg);
+        border: 2px solid var(--color-red);
+        border-radius: var(--btn-radius);
+        box-shadow: 2px 4px 4px rgba(0, 0, 0, 0.25);
+        cursor: pointer;
+
+        font-family: var(--font);
+        font-weight: var(--fw-semi);
+        font-size: var(--font-size-field);
+        color: var(--color-black);
+        letter-spacing: var(--letter-spacing);
+        line-height: 1.4;
+        text-align: center;
+
+        transition: opacity 0.15s ease;
+      }
+
+      /* Même comportement hover que les boutons du dashboard */
+      .login-page__btn:hover {
+        opacity: 0.75;
+        background-color: var(--color-hover);
+      }
+
+      .login-page__btn:active {
+        transform: translateY(1px);
+        box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      /* ─── Responsive – Tablet (≤ 1024px) ────────────────────────────── */
+      @media (max-width: 1024px) {
+        :root {
+          --input-width: min(622.645px, 90vw);
+          --font-size-field: 30px;
+          --gap-logo-to-form: 72px;
+          --gap-between-inputs: 56px;
+          --gap-inputs-to-btn: 56px;
+        }
+      }
+
+      /* ─── Responsive – Mobile (≤ 768px) ─────────────────────────────── */
+      @media (max-width: 768px) {
+        :root {
+          --input-width: 90vw;
+          --btn-w: 200px;
+          --font-size-field: 24px;
+          --letter-spacing: -0.48px;
+          --logo-size: 88px;
+          --gap-logo-to-form: 52px;
+          --gap-between-inputs: 40px;
+          --gap-inputs-to-btn: 40px;
+          --input-padding-l: 14px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="login-page">
+      <!-- Logo -->
+      <img
+        class="login-page__logo"
+        src="https://www.figma.com/api/mcp/asset/135d0550-5355-4a21-8548-801e658b4e8f"
+        alt="Logo Lab'O"
+      />
+
+      <!-- Login form -->
+      <form class="login-page__form" action="#" method="post" novalidate>
+        <div class="login-page__fields">
+          <!-- Username -->
+          <div class="login-page__field">
+            <input
+              class="login-page__input"
+              type="text"
+              id="identifiant"
+              name="identifiant"
+              placeholder="Identifiant..."
+              autocomplete="username"
+              aria-label="Identifiant"
+            />
+          </div>
+
+          <!-- Password -->
+          <div class="login-page__field">
+            <input
+              class="login-page__input"
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Mot de passe..."
+              autocomplete="current-password"
+              aria-label="Mot de passe"
+            />
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <button class="login-page__btn" type="submit">Valider</button>
+      </form>
+    </main>
+
+    <script>
+      document
+        .querySelector(".login-page__form")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+          // Redirection vers le dashboard après validation
+          window.location.href = "dashboard.html";
+        });
+    </script>
+  </body>
+</html>
