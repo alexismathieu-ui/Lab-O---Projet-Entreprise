@@ -354,9 +354,9 @@
 
     el.innerHTML = coworkers.map(c => `
       <div class="coworker-card">
-        <div class="coworker-avatar">${c.avatar ? `<img src="${escHtml(c.avatar)}">` : '👤'}</div>
-        <div class="coworker-name">${escHtml(c.name)}</div>
-        <div class="coworker-company">${escHtml(c.company)}</div>
+        <div class="coworker-avatar">${c.logo ? `<img src="${escHtml(c.logo)}" style="width:100%;height:100%;object-fit:contain;border-radius:8px">` : '🏢'}</div>
+        <div class="coworker-name">${escHtml(c.company)}</div>
+        <div class="coworker-company">CEO : ${escHtml(c.name)}</div>
         <div class="coworker-floor">${escHtml(c.floor)}</div>
         <div class="coworker-actions">
           <button class="btn btn-sm btn-secondary" onclick="openCoworkerModal('${c._id}','${escAttr(c.name)}','${escAttr(c.company)}','${escAttr(c.floor)}','${escAttr(c.contact)}','${escAttr(c.website)}','${escAttr(c.bio)}')">✏️ Modifier</button>
@@ -473,6 +473,27 @@
   function escAttr(s) { return String(s||'').replace(/'/g,'&#39;').replace(/"/g,'&quot;'); }
   function formatDate(d) { return new Date(d).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}); }
   function statusLabel(s) { return {pending:'En attente',approved:'Approuvé',rejected:'Rejeté'}[s]||s; }
+
+    // ─── MÉTÉO ───────────────────────────────────────────────────────────────────
+  async function loadWeather() {
+    try {
+      const data = await api('GET', '/api/weather');
+      const c = data.current;
+      const codes = { 0:'☀️ Dégagé', 1:'🌤 Peu nuageux', 2:'⛅ Nuageux', 3:'☁️ Couvert', 45:'🌫 Brouillard', 48:'🌫 Brouillard', 51:'🌦 Bruine', 61:'🌧 Pluie légère', 63:'🌧 Pluie', 71:'❄️ Neige légère', 80:'🌦 Averses', 95:'⛈ Orage' };
+      const desc = codes[c.weather_code] || '🌡 ' + c.weather_code;
+      document.getElementById('weather-widget').innerHTML = `
+        <span>🌡 <strong>${c.temperature_2m}°C</strong></span>
+        <span>💨 <strong>${c.wind_speed_10m} km/h</strong></span>
+        <span>💧 <strong>${c.relative_humidity_2m}%</strong></span>
+        <span>${desc}</span>
+      `;
+    } catch(e) {
+      document.getElementById('weather-widget').innerHTML = '<span style="color:var(--muted)">Météo indisponible</span>';
+    }
+  }
+
+  loadWeather();
+  setInterval(loadWeather, 5 * 60 * 1000); // refresh toutes les 5 min
 
   //─ INIT
   loadLoopStatus();

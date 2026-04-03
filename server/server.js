@@ -47,6 +47,14 @@ const AnnonceSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
   author: { type: String, default: "Anonyme" },
+  company: { type: String, default: "" },
+  floor: { type: String, default: "" },
+  logo: { type: String, default: "" },
+  qrcode: { type: String, default: "" },
+  jobTitle: { type: String, default: "" },
+  website: { type: String, default: "" },
+  email: { type: String, default: "" },
+  phone: { type: String, default: "" },
   status: { type: String, enum: ["pending", "approved", "rejected"], default: "pending" },
   createdAt: { type: Date, default: Date.now },
 });
@@ -63,13 +71,13 @@ const MediaSchema = new mongoose.Schema({
 const Media = mongoose.model("Media", MediaSchema);
 
 const CoworkerSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  company: { type: String, default: "" },
-  floor: { type: String, default: "" },
+  name: { type: String, required: true },        // Nom du CEO
+  company: { type: String, default: "" },        // Nom de la startup
+  floor: { type: String, default: "" },          // Étage
+  logo: { type: String, default: "" },           // URL du logo (image uploadée)
   bio: { type: String, default: "" },
   contact: { type: String, default: "" },
   website: { type: String, default: "" },
-  avatar: { type: String, default: "" },
   createdAt: { type: Date, default: Date.now },
 });
 const Coworker = mongoose.model("Coworker", CoworkerSchema);
@@ -235,7 +243,8 @@ app.post("/api/annonces", async (req, res) => {
 
 app.patch("/api/annonces/:id", async (req, res) => {
   try {
-    const annonce = await Annonce.findByIdAndUpdate(req.params.id, req.body, { new: true });
+  const annonce = await Annonce.findByIdAndUpdate(req.params.id, req.body, { new: true });
+  if (req.body.status === 'approved') io.emit('annonce-approved', annonce);
     if (!annonce) return res.status(404).json({ message: "Annonce introuvable." });
     res.json(annonce);
   } catch (err) { res.status(500).json({ message: "Erreur serveur." }); }
@@ -414,6 +423,19 @@ app.get("/api/loop/status", async (req, res) => {
     const alert = await Alert.findOne({ active: true });
     const question = await Question.findOne({ active: true });
     res.json({ posts, medias, coworkers, alert, question });
+  } catch (err) { res.status(500).json({ message: "Erreur serveur." }); }
+});
+
+// MÉTÉO (proxy pour éviter CORS)
+app.get("/api/weather", async (req, res) => {
+  try {
+    const https = require("https");
+    const url = "https://api.open-meteo.com/v1/forecast?latitude=47.9029&longitude=1.9039&current=temperature_2m,wind_speed_10m,weather_code,relative_humidity_2m&wind_speed_unit=kmh&timezone=Europe/Paris";
+    https.get(url, (r) => {
+      let data = "";
+      r.on("data", chunk => data += chunk);
+      r.on("end", () => res.json(JSON.parse(data)));
+    }).on("error", () => res.status(500).json({ message: "Erreur météo" }));
   } catch (err) { res.status(500).json({ message: "Erreur serveur." }); }
 });
 

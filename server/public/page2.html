@@ -1,42 +1,234 @@
 <!doctype html>
 <html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pulse — Bienvenue</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="stylesheet" href="style.css" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap"
-      rel="stylesheet"
-    />
-  </head>
-  <body>
-    <div class="card">
-      <div class="logo">
-        <div class="logo-dot"></div>
-        <span class="logo-text">LAB'O</span>
-      </div>
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+  <title>Pulse — Lab'O</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --red: #E8002A; --bg: #f5f0eb; --surface: #fff; --border: #e0d8cf; --text: #1a1008; --muted: #8a7e72; }
+    body { font-family: 'DM Mono', monospace; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-      <p class="welcome-label">Connecté en tant que</p>
-      <div class="username" id="username">—</div>
-      <p class="tagline">Bienvenue dans la communauté Lab'O</p>
+    /* HEADER */
+    .header { background: var(--surface); padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
+    .logo-circle { width: 36px; height: 36px; background: var(--red); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    .logo-circle svg { width: 20px; fill: white; }
+    .logo-text { font-family: 'Syne', sans-serif; font-weight: 800; font-size: .9rem; color: var(--text); }
 
-      <div class="divider"></div>
-      <a href="index.html">← Se déconnecter</a>
+    /* NAV TABS */
+    .nav-tabs { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); }
+    .nav-tab { flex: 1; padding: .75rem .5rem; text-align: center; font-size: .7rem; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: .15s; }
+    .nav-tab.active { color: var(--red); border-bottom-color: var(--red); font-weight: 500; }
+
+    /* PANELS */
+    .panel { display: none; padding: 1.25rem; }
+    .panel.active { display: block; }
+
+    /* CARDS */
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
+    .card-title { font-family: 'Syne', sans-serif; font-size: .95rem; font-weight: 700; margin-bottom: 1rem; }
+
+    /* FORM */
+    .form-group { margin-bottom: .9rem; }
+    .form-group label { display: block; font-size: .7rem; color: var(--muted); margin-bottom: .3rem; text-transform: uppercase; letter-spacing: .05em; }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%; padding: .6rem .8rem; border: 1px solid var(--border); border-radius: 8px;
+      font-family: 'DM Mono', monospace; font-size: .85rem; background: var(--bg); color: var(--text); outline: none;
+    }
+    .form-group input:focus, .form-group textarea:focus { border-color: var(--red); }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+    .char-count { font-size: .65rem; color: var(--muted); text-align: right; margin-top: .2rem; }
+
+    /* BUTTONS */
+    .btn { width: 100%; padding: .75rem; border: 1px solid var(--red); border-radius: 8px; background: transparent; color: var(--red); font-family: 'DM Mono', monospace; font-size: .85rem; cursor: pointer; transition: .15s; }
+    .btn:hover, .btn-primary { background: var(--red); color: white; }
+    .btn-primary { border-color: var(--red); }
+
+    /* QUESTION BOX */
+    .question-box { background: var(--red); color: white; border-radius: 12px; padding: 1.25rem; margin-bottom: 1.25rem; }
+    .question-label { font-size: .65rem; opacity: .8; text-transform: uppercase; letter-spacing: .1em; margin-bottom: .4rem; }
+    .question-text { font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; line-height: 1.4; }
+
+    /* ANNONCES TICKER */
+    .ticker-wrap { background: var(--text); color: #f5f0eb; padding: .5rem 0; overflow: hidden; margin-bottom: 1rem; border-radius: 8px; }
+    .ticker { display: flex; white-space: nowrap; animation: ticker 20s linear infinite; }
+    .ticker-item { padding: 0 2rem; font-size: .75rem; }
+    .ticker-sep { opacity: .4; }
+    @keyframes ticker { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+    /* TOAST */
+    .toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: var(--text); color: #f5f0eb; padding: .6rem 1.2rem; border-radius: 20px; font-size: .8rem; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 999; }
+    .toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div style="display:flex;align-items:center;gap:.6rem">
+    <div class="logo-circle">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
     </div>
+    <span class="logo-text">LAB'O</span>
+  </div>
+</div>
 
-    <script>
-      let user = null;
-      try { user = JSON.parse(localStorage.getItem('pulse_user') || 'null'); } catch(e) {}
+<div class="nav-tabs">
+  <div class="nav-tab active" onclick="showTab('question')">❓ Question du jour</div>
+  <div class="nav-tab" onclick="showTab('annonce')">📌 Annonce</div>
+</div>
 
-      if (user && user.email) {
-        document.getElementById("username").textContent = user.email;
-        document.title = "Pulse — " + user.email;
-      } else {
-        localStorage.removeItem('pulse_user');
-        window.location.replace("/");
-      }
-    </script>
-  </body>
+<!-- PANEL QUESTION -->
+<div class="panel active" id="panel-question">
+  <div id="question-display" class="question-box" style="display:none"></div>
+  <div class="card">
+    <div class="card-title">Répondre à la question du jour</div>
+    <div class="form-group">
+      <label>Prénom / Pseudo / Boîte</label>
+      <input type="text" id="q-author" placeholder="Ex: Marie, StartupXYZ..."/>
+    </div>
+    <div class="form-group">
+      <label>Message</label>
+      <textarea id="q-text" placeholder="Votre réponse..." maxlength="140" oninput="updateCount('q-text','q-count')"></textarea>
+      <div class="char-count"><span id="q-count">0</span>/140</div>
+    </div>
+    <div class="form-group">
+      <label>Animation du message</label>
+      <select id="q-category">
+        <option value="Info">Info</option>
+        <option value="Aide">Aide</option>
+        <option value="Détente">Détente</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" onclick="sendPost()">Envoyer</button>
+  </div>
+</div>
+
+<!-- PANEL ANNONCE -->
+<div class="panel" id="panel-annonce">
+
+  <!-- Ticker des annonces approuvées -->
+  <div id="ticker-wrap" class="ticker-wrap" style="display:none">
+    <div class="ticker" id="ticker"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Ajouter une annonce</div>
+    <div class="form-group"><label>Nom de la Boîte *</label><input type="text" id="a-company" placeholder="StartupXYZ"/></div>
+    <div class="form-group"><label>Étage</label><input type="text" id="a-floor" placeholder="2ème étage"/></div>
+    <div class="form-group"><label>Description *</label><textarea id="a-desc" placeholder="Description de votre annonce..."></textarea></div>
+    <div class="form-group"><label>Intitulé de poste</label><input type="text" id="a-job" placeholder="Développeur, Designer..."/></div>
+    <div class="form-group"><label>Nom et Prénom</label><input type="text" id="a-name" placeholder="Marie Dupont"/></div>
+    <div class="form-group"><label>Site Web</label><input type="text" id="a-web" placeholder="https://..."/></div>
+    <div class="form-group"><label>Email</label><input type="email" id="a-email" placeholder="contact@..."/></div>
+    <div class="form-group"><label>Téléphone</label><input type="tel" id="a-phone" placeholder="+33 6..."/></div>
+    <button class="btn btn-primary" onclick="sendAnnonce()">Envoyer</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io();
+
+// ─── TABS
+function showTab(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  event.target.classList.add('active');
+  if (name === 'annonce') loadTicker();
+}
+
+// TOAST
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// CHAR COUNT
+function updateCount(inputId, countId) {
+  document.getElementById(countId).textContent = document.getElementById(inputId).value.length;
+}
+
+// QUESTION DU JOUR
+async function loadQuestion() {
+  try {
+    const res = await fetch('/api/question');
+    const q = await res.json();
+    const box = document.getElementById('question-display');
+    if (q && q.text) {
+      box.style.display = 'block';
+      box.innerHTML = `<div class="question-label">Question du jour</div><div class="question-text">Question : ${q.text}</div>`;
+    }
+  } catch(e) {}
+}
+
+async function sendPost() {
+  const text = document.getElementById('q-text').value.trim();
+  const author = document.getElementById('q-author').value.trim() || 'Anonyme';
+  const category = document.getElementById('q-category').value;
+  if (!text) { toast('⚠️ Écris un message !'); return; }
+  try {
+    const res = await fetch('/api/posts', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ text, author, category }) });
+    const data = await res.json();
+    if (data._id) {
+      toast('✅ Message envoyé, en attente de modération !');
+      document.getElementById('q-text').value = '';
+      document.getElementById('q-author').value = '';
+      document.getElementById('q-count').textContent = '0';
+    } else { toast('❌ Erreur : ' + (data.message || 'inconnue')); }
+  } catch(e) { toast('❌ Erreur serveur'); }
+}
+
+// ANNONCES
+async function loadTicker() {
+  try {
+    const res = await fetch('/api/annonces?status=approved');
+    const annonces = await res.json();
+    const wrap = document.getElementById('ticker-wrap');
+    const ticker = document.getElementById('ticker');
+    if (!Array.isArray(annonces) || annonces.length === 0) { wrap.style.display='none'; return; }
+    wrap.style.display = 'block';
+    const items = annonces.map(a => `<span class="ticker-item">📌 <strong>${a.title || a.company}</strong> — ${a.description} <span class="ticker-sep">|</span></span>`).join('');
+    // Double pour que l'animation soit infinie sans saut
+    ticker.innerHTML = items + items;
+  } catch(e) {}
+}
+
+async function sendAnnonce() {
+  const company = document.getElementById('a-company').value.trim();
+  const description = document.getElementById('a-desc').value.trim();
+  if (!company || !description) { toast('⚠️ Nom de la boîte et description requis !'); return; }
+  const body = {
+    title: company,
+    description,
+    author: document.getElementById('a-name').value.trim() || 'Anonyme',
+    company,
+    floor: document.getElementById('a-floor').value.trim(),
+    jobTitle: document.getElementById('a-job').value.trim(),
+    website: document.getElementById('a-web').value.trim(),
+    email: document.getElementById('a-email').value.trim(),
+    phone: document.getElementById('a-phone').value.trim(),
+  };
+  try {
+    const res = await fetch('/api/annonces', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) });
+    const data = await res.json();
+    if (data._id) {
+      toast('✅ Annonce envoyée, en attente de validation !');
+      ['a-company','a-floor','a-desc','a-job','a-name','a-web','a-email','a-phone'].forEach(id => document.getElementById(id).value = '');
+    } else { toast('❌ ' + (data.message || 'Erreur')); }
+  } catch(e) { toast('❌ Erreur serveur'); }
+}
+
+// Socket : refresh ticker si une annonce est approuvée en temps réel
+socket.on('annonce-approved', loadTicker);
+
+// INIT
+loadQuestion();
+</script>
+</body>
 </html>
