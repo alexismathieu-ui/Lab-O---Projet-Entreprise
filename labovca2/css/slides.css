@@ -1,0 +1,954 @@
+/* ============================================================
+   css/slides.css
+   Diapositives (startup, évènement, partenaire, calendrier,
+   annonce), hero, dots, barre de progression, transitions
+   sweep/circle, ruban animé, ticker bannière rouge.
+   Design calqué sur la maquette fournie.
+   ============================================================ */
+
+/* ════════════════════════════════════════
+   ZONE SLIDE
+════════════════════════════════════════ */
+.slide-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ════════════════════════════════════════
+   TRANSITIONS
+════════════════════════════════════════ */
+
+/* ── Sweep (balayage) : entre slides du même onglet ── */
+.sweep-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  overflow: hidden;
+}
+.sweep-a,
+.sweep-b {
+  position: absolute;
+  inset: 0;
+  transform: translateX(-105%);
+  pointer-events: none;
+}
+.sweep-a {
+  background: linear-gradient(
+    90deg,
+    var(--red) 0%,
+    var(--red-lt) 60%,
+    var(--red-bg) 100%
+  );
+}
+.sweep-b {
+  background: linear-gradient(
+    90deg,
+    var(--cream) 0%,
+    var(--cream2) 70%,
+    transparent 100%
+  );
+}
+.sweep-overlay.sweeping .sweep-a {
+  animation: sweepA 0.55s cubic-bezier(0.76, 0, 0.24, 1) forwards;
+}
+.sweep-overlay.sweeping .sweep-b {
+  animation: sweepB 0.55s cubic-bezier(0.76, 0, 0.24, 1) 0.08s forwards;
+}
+@keyframes sweepA {
+  0% {
+    transform: translateX(-105%);
+  }
+  45% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(105%);
+  }
+}
+@keyframes sweepB {
+  0% {
+    transform: translateX(-105%);
+  }
+  50% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(105%);
+  }
+}
+
+/* ── Circle burst : changement d'onglet ── */
+.circle-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 48;
+  pointer-events: none;
+  overflow: hidden;
+}
+.circle-burst {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    var(--cream) 0%,
+    var(--red-lt) 40%,
+    var(--red) 70%,
+    var(--red-dk) 100%
+  );
+  transform: translate(-50%, -50%);
+}
+.circle-burst.expanding {
+  animation: cBurst 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@keyframes cBurst {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 0.9;
+  }
+  70% {
+    opacity: 0.8;
+  }
+  100% {
+    width: 280vmax;
+    height: 280vmax;
+    opacity: 0;
+  }
+}
+
+/* ── Entrée du contenu ── */
+.slide-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  animation: sldIn 0.35s ease;
+}
+@keyframes sldIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ── Ruban animé arrière-plan ── */
+.ribbon-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* ════════════════════════════════════════
+   HERO (titre de la zone principale)
+   Fidèle maquette : cercle rouge partiellement coupé
+   en haut-gauche, titre très grand, deux lignes décoratives.
+════════════════════════════════════════ */
+.hero {
+  padding: 16px 20px 28px 28px;
+  position: relative;
+  flex-shrink: 0;
+  z-index: 1;
+  background: var(--cream);
+  overflow: hidden;
+}
+
+/* Grand cercle rouge coupé en haut-gauche */
+.hero::before {
+  content: "";
+  position: absolute;
+  left: -22px;
+  top: -22px;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: var(--red);
+  z-index: 0;
+}
+
+/* Deux lignes décoratives noires sous le titre */
+.hero::after {
+  content: "";
+  position: absolute;
+  bottom: 11px;
+  left: 90px;
+  width: 58%;
+  height: 2.5px;
+  background: var(--dark);
+  box-shadow: 0 8px 0 0 var(--dark);
+}
+
+.hero h1 {
+  font-family: var(--fd);
+  font-size: clamp(34px, 4.8vw, 64px);
+  font-weight: var(--fw-bold);
+  line-height: 1;
+  text-transform: uppercase;
+  padding-left: 78px;
+  letter-spacing: var(--ls-title);
+  position: relative;
+  z-index: 1;
+}
+.hero h1 span {
+  color: var(--red);
+}
+
+.hero-sub {
+  font-family: var(--fd);
+  font-size: 13px;
+  font-weight: var(--fw-semi);
+  color: var(--gray);
+  padding-left: 78px;
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  position: relative;
+  z-index: 1;
+}
+
+/* ════════════════════════════════════════
+   POINTS DE NAVIGATION
+════════════════════════════════════════ */
+.nav-dots {
+  display: flex;
+  gap: 6px;
+  padding: 6px 20px;
+  border-bottom: 1px solid var(--cream3);
+  flex-shrink: 0;
+  z-index: 1;
+  position: relative;
+  align-items: center;
+  min-height: 26px;
+}
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--cream3);
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  border: 1px solid var(--cream3);
+}
+.dot.active {
+  background: var(--red);
+  border-color: var(--red);
+  transform: scale(1.3);
+}
+
+/* ════════════════════════════════════════
+   BARRE DE PROGRESSION
+════════════════════════════════════════ */
+.pbar {
+  height: 2px;
+  background: var(--cream3);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+}
+.pbar-fill {
+  height: 100%;
+  background: var(--red);
+  width: 0;
+  transition: width linear;
+}
+
+/* ════════════════════════════════════════
+   DIAPOSITIVE STARTUP
+   Image gauche 40%, infos droite.
+   Fidèle maquette image 5 : intitulé de poste,
+   QR code optionnel dans le footer.
+════════════════════════════════════════ */
+.startup-slide {
+  display: grid;
+  grid-template-columns: 40% 1fr;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+.card-img-col {
+  border-right: 2px solid var(--dark2);
+  background: var(--cream2);
+  position: relative;
+  overflow: hidden;
+}
+/* Placeholder image */
+.card-img-col .ph {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cream3);
+}
+.card-img-col .ph svg {
+  width: 56px;
+  height: 56px;
+  opacity: 0.2;
+  color: var(--dark3);
+}
+.card-img-col img.cimg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  position: absolute;
+  inset: 0;
+}
+
+/* Cercle rouge décoratif bas-droite + deux lignes verticales noires */
+.deco-circ {
+  position: absolute;
+  bottom: -32px;
+  right: -22px;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: var(--red);
+  z-index: 2;
+  pointer-events: none;
+}
+.deco-circ::before,
+.deco-circ::after {
+  content: "";
+  position: absolute;
+  width: 3px;
+  height: 72px;
+  background: var(--dark);
+  top: -42px;
+}
+.deco-circ::before {
+  left: 28%;
+}
+.deco-circ::after {
+  left: 52%;
+}
+
+/* Infos entreprise */
+.card-info {
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  background: var(--cream);
+}
+.co-head {
+  display: flex;
+  align-items: left;
+  gap: 14px;
+}
+
+/* Cercle avatar avec initiale */
+.co-logo {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--cream3);
+  border: 2px solid var(--cream3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--fd);
+  font-weight: 700;
+  font-size: 32px;
+  color: var(--dark);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.co-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.co-names h2 {
+  font-family: var(--fd);
+  font-size: clamp(26px, 3.2vw, 44px);
+  font-weight: var(--fw-bold);
+  line-height: 1.05;
+  letter-spacing: var(--ls-filter);
+}
+.co-floor {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--fd);
+  font-size: 18px;
+  font-weight: var(--fw-semi);
+  color: var(--gray);
+  margin-top: 3px;
+  font-style: italic;
+}
+.co-floor svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* Description */
+.co-desc {
+  font-family: var(--fb);
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--dark2);
+  flex: 1;
+}
+
+/* Pied de carte startup — infos meta + QR optionnel à droite */
+.card-footer {
+  border-top: 2px solid var(--dark2);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+  background: var(--cream);
+}
+.card-footer-inner {
+  padding: 12px 22px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.card-meta {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.mrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.mlbl {
+  font-family: var(--fd);
+  font-weight: var(--fw-bold);
+  font-size: 18px;
+  color: var(--dark);
+  white-space: nowrap;
+}
+.mval {
+  font-family: var(--fb);
+  color: var(--dark3);
+  font-size: 16px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px;
+}
+
+/* QR dans le footer — visible seulement si URL fournie */
+.card-qr-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.qrlbl-footer {
+  font-family: var(--fd);
+  font-size: 16px;
+  font-weight: var(--fw-bold);
+  line-height: 1.3;
+  color: var(--dark);
+  text-align: center;
+}
+/* Boîte QR code noire */
+.qrbox {
+  width: 74px;
+  height: 74px;
+  background: var(--dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.qrbox img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* ════════════════════════════════════════
+   DIAPOSITIVE ANNONCE (image plein cadre)
+════════════════════════════════════════ */
+.announcement-slide {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  background: var(--cream2);
+}
+.ann-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+/* Placeholder quand pas d'image (ne devrait pas arriver normalement) */
+.ann-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: var(--cream3);
+}
+.ann-name {
+  font-family: var(--fd);
+  font-size: clamp(28px, 4vw, 56px);
+  font-weight: 700;
+  color: var(--dark);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-title);
+  text-align: center;
+  padding: 20px;
+}
+
+/* ════════════════════════════════════════
+   DIAPOSITIVE CALENDRIER
+   Tous les évènements classés par date,
+   2 colonnes, style fidèle à la maquette.
+════════════════════════════════════════ */
+.calendar-slide {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  background: var(--cream);
+}
+/* En-tête avec titre CALENDRIER et déco cercle */
+.cal-header {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 18px 28px 14px;
+  flex-shrink: 0;
+  position: relative;
+}
+.cal-deco {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--red);
+  position: absolute;
+  left: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  flex-shrink: 0;
+}
+/* Deux lignes noires déco sur le cercle */
+.cal-deco::before,
+.cal-deco::after {
+  content: "";
+  position: absolute;
+  width: 3px;
+  height: 52px;
+  background: var(--dark);
+  top: -32px;
+}
+.cal-deco::before {
+  left: 28%;
+}
+.cal-deco::after {
+  left: 52%;
+}
+.cal-title {
+  font-family: var(--fd);
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--ls-title);
+  padding-left: 70px;
+  color: var(--red);
+  line-height: 1;
+}
+/* Colonnes d'évènements */
+.cal-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 20px;
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 24px 16px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--red) transparent;
+}
+/* Un évènement dans le calendrier */
+.cal-event {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+/* Badge date — parallélogramme rouge avec jour+numéro */
+.cal-date-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 56px;
+  padding: 4px 8px;
+  background: var(--red);
+  color: white;
+  clip-path: polygon(8% 0%, 100% 0%, 92% 100%, 0% 100%);
+  flex-shrink: 0;
+}
+.cal-day-word {
+  font-family: var(--fd);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+.cal-day-num {
+  font-family: var(--fd);
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
+}
+/* Infos de l'évènement */
+.cal-event-info {
+  flex: 1;
+  min-width: 0;
+}
+.cal-event-title {
+  font-family: var(--fd);
+  font-size: clamp(18px, 2.2vw, 28px);
+  font-weight: 700;
+  line-height: 1.1;
+  text-transform: uppercase;
+  letter-spacing: var(--ls-filter);
+  color: var(--dark);
+  margin-bottom: 4px;
+}
+.cal-event-desc {
+  font-family: var(--fb);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--dark3);
+  overflow: hidden;
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.cal-event-time {
+  font-family: var(--fb);
+  font-size: 12px;
+  color: var(--gray);
+  font-weight: 600;
+  margin-top: 2px;
+}
+/* Cercle rouge décoratif bas-droite du calendrier */
+.cal-deco-br {
+  position: absolute;
+  bottom: -32px;
+  right: -22px;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: var(--red);
+  z-index: 2;
+  pointer-events: none;
+}
+.cal-deco-br::before,
+.cal-deco-br::after {
+  content: "";
+  position: absolute;
+  width: 3px;
+  height: 72px;
+  background: var(--dark);
+  top: -42px;
+}
+.cal-deco-br::before {
+  left: 28%;
+}
+.cal-deco-br::after {
+  left: 52%;
+}
+
+/* ════════════════════════════════════════
+   DIAPOSITIVE PARTENAIRE
+   Une diapo = une thématique avec liste.
+   Sans colonne image à gauche.
+════════════════════════════════════════ */
+.partner-slide {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+  padding: 24px 28px;
+  background: var(--cream);
+}
+.pt-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 14px;
+  overflow-y: auto;
+  flex: 1;
+}
+/* Emoji + secteur */
+.pt-sector-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--red);
+  color: white;
+  font-family: var(--fd);
+  font-size: 18px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 5px 16px;
+  width: fit-content;
+  letter-spacing: var(--ls-btn);
+}
+.pt-name {
+  font-family: var(--fd);
+  font-size: clamp(28px, 3.2vw, 48px);
+  font-weight: 700;
+  text-transform: uppercase;
+  line-height: 1.05;
+  letter-spacing: var(--ls-filter);
+}
+.pt-logos-grid {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 4px;
+}
+/* Chaque logo partenaire dans sa boîte */
+.pt-logo-chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: white;
+  border: 1.5px solid var(--cream3);
+  padding: 8px 16px;
+  font-family: var(--fb);
+  font-size: 15px;
+  font-weight: 600;
+  text-align: center;
+}
+.pt-logo-chip img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+/* Chip avec logo uniquement (sans texte) : logo plus grand */
+.pt-logo-chip--img-only {
+  padding: 10px 14px;
+}
+.pt-logo-chip--img-only img {
+  width: auto;
+  height: 120px;
+  object-fit: contain;
+}
+.pt-desc {
+  font-family: var(--fb);
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--dark2);
+}
+
+/* ════════════════════════════════════════
+   BANNIÈRE TICKER ROUGE (bas de page)
+   Fidèle maquette : fond rouge vif, titre gras Yanone
+════════════════════════════════════════ */
+.bot-banner {
+  border-top: 2px solid var(--dark2);
+  background: var(--red);
+  padding: 7px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+  z-index: 1;
+  position: relative;
+}
+.bot-banner h3 {
+  font-family: var(--fd);
+  font-size: clamp(13px, 1.6vw, 17px);
+  font-weight: 700;
+  color: white;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+/* Séparateur vertical entre titre et ticker */
+.bot-sep {
+  width: 2px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.4);
+  flex-shrink: 0;
+}
+.ticker-wrap {
+  overflow: hidden;
+  flex: 1;
+}
+.ticker-inner {
+  display: flex;
+  gap: 24px;
+  animation: tick 24s linear infinite;
+  white-space: nowrap;
+}
+.ti {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.92);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: 600;
+}
+.ts {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 16px;
+  margin: 0 4px;
+}
+@keyframes tick {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* ════════════════════════════════════════
+   RESPONSIVE SLIDES
+════════════════════════════════════════ */
+@media (max-width: 1100px) {
+  .hero h1 {
+    font-size: clamp(28px, 4vw, 50px);
+    padding-left: 68px;
+  }
+  .hero-sub {
+    padding-left: 68px;
+  }
+  .hero::after {
+    left: 76px;
+  }
+  .co-names h2 {
+    font-size: clamp(22px, 2.6vw, 36px);
+  }
+  .cal-title {
+    font-size: clamp(28px, 4vw, 50px);
+  }
+}
+@media (max-width: 900px) {
+  .startup-slide {
+    grid-template-columns: 44% 1fr;
+  }
+  .hero h1 {
+    font-size: clamp(24px, 3.5vw, 42px);
+  }
+  .co-names h2 {
+    font-size: clamp(18px, 2.2vw, 28px);
+  }
+  .co-logo {
+    width: 58px;
+    height: 58px;
+    font-size: 26px;
+  }
+  .pt-name {
+    font-size: clamp(20px, 2.4vw, 30px);
+  }
+  .co-desc {
+    font-size: 14px;
+  }
+  .mlbl,
+  .mval {
+    font-size: 14px;
+  }
+  .cal-cols {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 700px) {
+  .hero {
+    padding: 12px 14px 22px;
+  }
+  .hero::before {
+    width: 72px;
+    height: 72px;
+    left: -16px;
+    top: -16px;
+  }
+  .hero h1 {
+    font-size: 26px;
+    padding-left: 56px;
+  }
+  .hero-sub {
+    padding-left: 56px;
+  }
+  .hero::after {
+    left: 64px;
+    width: 55%;
+  }
+  .startup-slide {
+    grid-template-columns: 1fr;
+    grid-template-rows: 140px 1fr;
+  }
+  .card-img-col {
+    border-right: none;
+    border-bottom: 2px solid var(--dark2);
+  }
+  .co-names h2 {
+    font-size: 22px;
+  }
+  .co-logo {
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+  .co-floor {
+    font-size: 14px;
+  }
+  .co-desc {
+    font-size: 13px;
+  }
+  .pt-name {
+    font-size: 22px;
+  }
+  .mlbl {
+    font-size: 15px;
+  }
+  .mval {
+    font-size: 14px;
+  }
+  .cal-title {
+    font-size: 28px;
+  }
+  .cal-event-title {
+    font-size: 16px;
+  }
+}

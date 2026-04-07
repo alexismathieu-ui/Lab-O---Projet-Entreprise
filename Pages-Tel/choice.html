@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lab'O — Add Post</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Yanone+Kaffeesatz:wght@600&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      /* ─── Design Tokens ──────────────────────────────────────────── */
+      :root {
+        --color-labo-white: #f8f2eb;
+        --color-labo-red: #e53530;
+        --color-labo-black: #050707;
+        --color-page-bg: #ddd5c8;
+        --font-primary: "Yanone Kaffeesatz", sans-serif;
+        --btn-radius: 10px;
+        --shadow-btn: 2px 4px 4px 0px rgba(0, 0, 0, 0.25);
+      }
+
+      /* ─── Reset ──────────────────────────────────────────────────── */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════
+         MOBILE FIRST — base styles target small screens
+         ═══════════════════════════════════════════════════════════════ */
+
+      html,
+      body {
+        width: 100%;
+        min-height: 100%;
+      }
+
+      body {
+        background-color: var(--color-labo-white);
+        font-family: var(--font-primary);
+        min-height: 100svh;
+        min-height: 100vh; /* fallback */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* Wrapper — on mobile just fills the viewport */
+      .phone-scene {
+        width: 100%;
+        min-height: 100svh;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* Phone — on mobile: flex column, no chrome */
+      .phone {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        min-height: 100svh;
+        min-height: 100vh;
+        padding: clamp(32px, 8vw, 60px) clamp(24px, 6vw, 40px);
+        gap: clamp(16px, 4vw, 22px);
+        background-color: var(--color-labo-white);
+      }
+
+      /* Status bar — masquée sur mobile */
+      .status-bar {
+        display: none;
+      }
+
+      /* ─── Logo ───────────────────────────────────────────────────── */
+      .logo {
+        width: clamp(80px, 25vw, 114px);
+        height: clamp(80px, 25vw, 114px);
+        margin-bottom: clamp(8px, 3vw, 20px);
+        flex-shrink: 0;
+      }
+
+      .logo__img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        pointer-events: none;
+      }
+
+      /* ─── Action Buttons — flux normal sur mobile ─────────────────── */
+      .action-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: min(300px, 100%);
+        min-height: clamp(58px, 14vw, 78px);
+        padding: 12px 19px;
+        background-color: var(--color-labo-white);
+        border: 2px solid var(--color-labo-red);
+        border-radius: var(--btn-radius);
+        box-shadow: var(--shadow-btn);
+        text-decoration: none;
+        cursor: pointer;
+        transition:
+          transform 0.12s ease,
+          opacity 0.12s ease;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .action-btn:hover {
+        opacity: 0.88;
+      }
+
+      .action-btn:active {
+        transform: scale(0.97);
+        opacity: 0.8;
+      }
+
+      .action-btn__label {
+        font-family: var(--font-primary);
+        font-weight: 600;
+        font-size: clamp(20px, 6vw, 28px);
+        color: var(--color-labo-black);
+        text-align: center;
+        letter-spacing: -0.56px;
+        line-height: 1.4;
+        user-select: none;
+      }
+
+      /* Home indicator — masqué sur mobile */
+      .home-indicator {
+        display: none;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════
+         DESKTOP — min-width: 769px
+         Restaure la maquette phone avec positionnement absolu
+         ═══════════════════════════════════════════════════════════════ */
+      @media (min-width: 769px) {
+        body {
+          background-color: var(--color-page-bg);
+        }
+
+        .phone-scene {
+          padding: 40px 20px;
+          min-height: 100vh;
+        }
+
+        /* Restaure le shell phone */
+        .phone {
+          display: block;
+          position: relative;
+          width: 402px;
+          height: 872px;
+          min-height: unset;
+          padding: 0;
+          gap: 0;
+          background-color: var(--color-labo-white);
+          border-radius: 50px;
+          box-shadow:
+            0 0 0 10px #1a1a1a,
+            0 0 0 12px #3a3a3a,
+            0 24px 80px rgba(0, 0, 0, 0.45);
+          overflow: hidden;
+          flex-shrink: 0;
+        }
+
+        /* Status bar */
+        .status-bar {
+          display: block;
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 402px;
+          height: 72px;
+          background: transparent;
+          overflow: hidden;
+          pointer-events: none;
+        }
+
+        .status-bar__time {
+          position: absolute;
+          left: 38px;
+          top: 25px;
+          width: 54px;
+          height: 21px;
+        }
+
+        .status-bar__time img {
+          display: block;
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+        }
+
+        .status-bar__right {
+          position: absolute;
+          right: 30.34px;
+          top: 29px;
+          width: 66.661px;
+          height: 11.336px;
+        }
+
+        .status-bar__right img {
+          display: block;
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+        }
+
+        /* Logo — retour en absolu */
+        .logo {
+          position: absolute;
+          top: 126px;
+          left: 144px;
+          width: 114px;
+          height: 114px;
+          margin-bottom: 0;
+          flex-shrink: unset;
+        }
+
+        /* Boutons — retour en absolu */
+        .action-btn {
+          position: absolute;
+          left: 51px;
+          width: 300px;
+          min-height: unset;
+          padding: 0;
+        }
+
+        .action-btn--question {
+          top: 330px;
+          height: 78px;
+        }
+
+        .action-btn--news {
+          top: 541px;
+          height: 77px;
+        }
+
+        .action-btn__label {
+          font-size: 28px;
+          letter-spacing: -0.56px;
+          padding: 0 19px;
+        }
+
+        /* Home indicator */
+        .home-indicator {
+          display: block;
+          position: absolute;
+          bottom: 10px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 161px;
+          height: 6px;
+          background-color: var(--color-labo-black);
+          border-radius: 100px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="phone-scene">
+      <div class="phone">
+
+        <!-- ── Status Bar (visible sur desktop uniquement) ────────── -->
+        <div class="status-bar" aria-hidden="true">
+          <div class="status-bar__time">
+            <img src="" alt="" />
+          </div>
+          <div class="status-bar__right">
+            <img src="" alt="" />
+          </div>
+        </div>
+
+        <!-- ── Logo ──────────────────────────────────────────────── -->
+        <div class="logo">
+          <img
+            class="logo__img"
+            src="https://www.figma.com/api/mcp/asset/0a2c4e72-6eb3-4449-89b6-f539a2a3b7e0"
+            alt="Logo Lab'O"
+          />
+        </div>
+
+        <!-- ── CTA 1 ───────────────────────────────────────────── -->
+        <a
+          href="#"
+          class="action-btn action-btn--question"
+          role="button"
+          aria-label="Répondre à la question du jour"
+        >
+          <span class="action-btn__label">Répondre à la question du jour</span>
+        </a>
+
+        <!-- ── CTA 2 ───────────────────────────────────────────── -->
+        <a
+          href="#"
+          class="action-btn action-btn--news"
+          role="button"
+          aria-label="Ajouter une nouveauté"
+        >
+          <span class="action-btn__label">Ajouter une nouveauté</span>
+        </a>
+
+        <!-- ── Home Indicator (visible sur desktop uniquement) ──── -->
+        <div class="home-indicator" aria-hidden="true"></div>
+
+      </div>
+    </div>
+  </body>
+</html>

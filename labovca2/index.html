@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lab'O Village by CA</title>
+  <!--
+    ============================================================
+    index.html — Point d'entrée
+    ============================================================
+    Structure du projet :
+      index.html
+      css/
+        variables.css   → tokens (couleurs, polices, radius)
+        layout.css      → login, barre admin, navigation, grille
+        slides.css      → diapositives, transitions, ruban, ticker
+        components.css  → sidebar, drawer admin, boutons, QR
+      js/
+        config.js       → configuration et données par défaut
+        store.js        → état global D, localStorage, helpers
+        auth.js         → authentification, modes admin/écran
+        slideshow.js    → moteur diaporama, transitions, ruban
+        sidebar.js      → horloge, météo, question, votes, QR
+        drawer.js       → panel modération complet
+    ============================================================
+  -->
+  <link rel="stylesheet" href="css/variables.css"/>
+  <link rel="stylesheet" href="css/layout.css"/>
+  <link rel="stylesheet" href="css/slides.css"/>
+  <link rel="stylesheet" href="css/components.css"/>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════
+     ÉCRAN DE CONNEXION
+════════════════════════════════════════ -->
+<div id="loginScreen">
+  <div class="lbox">
+    <div class="lbox-logo">
+      <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" width="90" height="90">
+        <circle cx="60" cy="60" r="60" fill="#e53530"/>
+        <text x="60" y="52" text-anchor="middle" font-family="Yanone Kaffeesatz,sans-serif"
+              font-weight="700" font-size="28" fill="white" letter-spacing="1">LAB'O</text>
+        <text x="60" y="78" text-anchor="middle" font-family="Yanone Kaffeesatz,sans-serif"
+              font-weight="400" font-size="13" fill="rgba(255,255,255,0.82)" letter-spacing="2">VILLAGE BY CA</text>
+      </svg>
+    </div>
+    <h2 class="lbox-title">Connexion Admin</h2>
+    <div class="lbox-field">
+      <input type="password" id="pwdInput" class="lbox-input"
+             placeholder="Mot de passe administrateur"
+             onkeydown="if(event.key==='Enter') doLogin()"/>
+    </div>
+    <div id="lerr" class="lerr">Mot de passe incorrect.</div>
+    <button class="btn btn-valider" onclick="doLogin()">Valider</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     BARRE ADMIN (masquée en mode écran)
+════════════════════════════════════════ -->
+<div id="adminBar">
+  <div class="abl">
+    <!-- Burger → ouvre le panel de modération -->
+    <button id="burgerBtn" onclick="toggleDrawer()">
+      <span></span><span></span><span></span>
+    </button>
+    <span class="albl">Lab'O Village</span>
+    <span class="abadge">Admin</span>
+  </div>
+  <div class="abr">
+    <div class="mtog">
+      <button class="mbtn on" id="btnA" onclick="setMode('admin')">Admin</button>
+      <button class="mbtn"    id="btnS" onclick="setMode('screen')">Écran</button>
+    </div>
+    <button class="btn btn-white" onclick="logout()">Déconnexion</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     DRAWER PLEIN ÉCRAN (panel modération)
+════════════════════════════════════════ -->
+<div id="drwOv" onclick="closeDrawer()"></div>
+<div id="drawer">
+  <!-- Le contenu est injecté dynamiquement par drawer.js dans #drwInner -->
+  <div class="drw-inner" id="drwInner"></div>
+</div>
+
+<!-- ════════════════════════════════════════
+     NAVIGATION ONGLETS (masquée en mode écran)
+════════════════════════════════════════ -->
+<nav id="topNav">
+  <div class="nav-tab active" onclick="setTab(this,'all')">Tous</div>
+  <div class="nav-tab"        onclick="setTab(this,'startups')">StartUps</div>
+  <div class="nav-tab"        onclick="setTab(this,'events')">Évènements et Actualités</div>
+  <div class="nav-tab"        onclick="setTab(this,'calendar')">Calendrier</div>
+  <div class="nav-tab"        onclick="setTab(this,'partners')">Partenaires</div>
+</nav>
+
+<!-- ════════════════════════════════════════
+     GRILLE PRINCIPALE (contenu + sidebar)
+════════════════════════════════════════ -->
+<div class="main">
+
+  <!-- ZONE DE CONTENU (diaporama) -->
+  <div class="content" id="mainContent">
+
+    <!-- Ruban animé SVG en arrière-plan -->
+    <div class="ribbon-canvas" id="ribbonCanvas"></div>
+
+    <!-- Overlay transition sweep (balayage entre slides) -->
+    <div class="sweep-overlay" id="sweepOverlay">
+      <div class="sweep-a"></div>
+      <div class="sweep-b"></div>
+    </div>
+
+    <!-- Overlay transition circle burst (changement d'onglet) -->
+    <div class="circle-overlay" id="circleOverlay"></div>
+
+    <!-- Hero : barre rouge déco + titre + compteur -->
+    <div class="hero">
+      <h1 id="heroTitle">Découvrez les <span>Startups</span><br>du Lab'O Village by CA</h1>
+      <div class="hero-sub" id="heroSub"></div>
+    </div>
+
+    <!-- Points de navigation -->
+    <div class="nav-dots" id="navDots"></div>
+    <!-- Barre de progression temporelle -->
+    <div class="pbar"><div class="pbar-fill" id="pbarFill"></div></div>
+
+    <!-- Zone d'injection des diapositives -->
+    <div class="slide-wrap" id="slideWrap"></div>
+
+    <!-- Bannière rouge + ticker bas de page -->
+    <div class="bot-banner">
+      <h3 id="bannerTitle">Nouveauté LAB'O le Village by CA</h3>
+      <div class="bot-sep"></div>
+      <div class="ticker-wrap">
+        <div class="ticker-inner" id="tickerInner"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR DROITE -->
+  <div class="sidebar">
+
+    <!-- QR "Ajoutez votre annonce" — en haut -->
+    <div class="sb-announce">
+      <div class="announce-label">
+        Ajoutez votre annonce !
+        <span>Scanner le QR code</span>
+      </div>
+      <div class="qrbox-sm" onclick="openQRPage()" title="Répondre à la question du jour">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="34" height="34">
+          <rect x="10" y="10" width="30" height="30" fill="none" stroke="white" stroke-width="6" rx="2"/>
+          <rect x="18" y="18" width="14" height="14" fill="white" rx="1"/>
+          <rect x="60" y="10" width="30" height="30" fill="none" stroke="white" stroke-width="6" rx="2"/>
+          <rect x="68" y="18" width="14" height="14" fill="white" rx="1"/>
+          <rect x="10" y="60" width="30" height="30" fill="none" stroke="white" stroke-width="6" rx="2"/>
+          <rect x="18" y="68" width="14" height="14" fill="white" rx="1"/>
+          <rect x="60" y="60" width="10" height="10" fill="white" rx="1"/>
+          <rect x="74" y="60" width="10" height="10" fill="white" rx="1"/>
+          <rect x="60" y="74" width="10" height="10" fill="white" rx="1"/>
+          <rect x="74" y="74" width="16" height="10" fill="white" rx="1"/>
+          <rect x="74" y="88" width="10" height="2" fill="white"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Question du jour + ⭐ réponses précédentes -->
+    <div class="sb-q">
+      <div class="sec-title">Question du jour</div>
+      <div class="q-text" id="qText">Chargement...</div>
+      <button class="star-btn" id="starBtn" onclick="togglePrev()" title="Réponses précédentes">⭐</button>
+      <div class="prev-answers" id="prevAnswers"><ul id="prevList"></ul></div>
+    </div>
+
+    <!-- Votes / réponses acceptées -->
+    <div class="sb-votes" id="sbVotes"></div>
+
+    <!-- Horloge date + heure — en bas -->
+    <div class="sb-clock">
+      <div class="sb-date" id="sbDate">—</div>
+      <div class="sb-time" id="sbTime">00:00</div>
+    </div>
+
+    <!-- Météo (API Open-Meteo) — en bas -->
+    <div class="sb-weather">
+      <div class="sb-weather-main">
+        <span id="weatherIcon">🌤</span>
+        <span id="tempDisplay">—°C</span>
+      </div>
+      <div class="sb-weather-detail" id="weatherDetail">Chargement...</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PAGE DE RÉPONSE QR (plein écran)
+     Simulée en local (en prod = URL séparée)
+════════════════════════════════════════ -->
+<div id="qrPage">
+  <div class="qr-form-box">
+    <h2>💬 Répondre</h2>
+    <p id="qrQuestion">Question du jour</p>
+    <div class="fg">
+      <label>Votre prénom</label>
+      <input type="text" id="qrName" placeholder="Prénom..."/>
+    </div>
+    <div class="fg">
+      <label>Votre réponse</label>
+      <textarea id="qrAnswer" placeholder="Votre réponse..." rows="4"></textarea>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:12px">
+      <button class="btn btn-red"   onclick="submitQR()">Envoyer ✓</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('qrPage').style.display='none'">Fermer</button>
+    </div>
+    <div id="qrSuccess">✓ Réponse envoyée, en attente de validation !</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SCRIPTS (ordre d'import important)
+     config → store → auth → slideshow → sidebar → drawer
+════════════════════════════════════════ -->
+<script src="js/idb.js"></script>
+<script src="js/config.js"></script>
+<script src="js/store.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/slideshow.js"></script>
+<script src="js/sidebar.js"></script>
+<script src="js/drawer.js"></script>
+
+<script>
+  /* ── Initialisation au chargement ── */
+  async function initApp() {
+    D = await loadData();   /* charge depuis IndexedDB (ou migration localStorage) */
+    updateQuestion();       /* affiche la question du jour */
+    renderVotes();          /* affiche les votes en sidebar */
+    renderSlideshow();      /* affiche la première diapositive */
+  }
+  initApp();
+</script>
+
+</body>
+</html>

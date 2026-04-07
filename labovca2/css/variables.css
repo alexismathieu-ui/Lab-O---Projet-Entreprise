@@ -1,0 +1,121 @@
+/* ============================================================
+   css/variables.css
+   Tokens de design : couleurs, polices, rayons, ombres.
+   La palette est alignée sur le dashboard : beige chaud #f8f2eb,
+   rouge vif #e53530, texte quasi-noir #050707, hover #f99492.
+   Polices : Yanone Kaffeesatz (titres) + Source Sans Pro (corps).
+   ============================================================ */
+
+@import url("https://fonts.googleapis.com/css2?family=Yanone+Kaffeesatz:wght@400;600;700&family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap");
+
+:root {
+  /* ── Palette principale (alignée dashboard) ── */
+  --cream: #f8f2eb; /* fond principal beige chaud */
+  --cream2: #f0e9e0; /* beige légèrement plus sombre (zones secondaires) */
+  --cream3: #e2d9ce; /* bordures / séparateurs */
+  --red: #e53530; /* rouge marque, titres, accents */
+  --red-dk: #c9201b; /* rouge foncé hover */
+  --red-lt: #f99492; /* rouge clair / hover doux */
+  --red-bg: #fff0f0; /* fond teinté rouge très léger */
+  --dark: #050707; /* texte principal, quasi-noir */
+  --dark2: #050707; /* bordures sombres, contours */
+  --dark3: #3a3a3a; /* texte secondaire */
+  --gray: #888888; /* sous-titres, labels discrets */
+  --white: #ffffff;
+
+  /* ── Alias sémantiques ── */
+  --surface: var(--cream);
+  --surface2: var(--cream2);
+  --border: var(--dark2);
+  --text: var(--dark);
+  --text2: var(--dark3);
+  --accent: var(--red);
+  --hover: var(--red-lt); /* hover doux (rouge pastel) */
+
+  /* ── Typographie (alignée dashboard) ── */
+  --fw-bold: 700;
+  --fw-semi: 600;
+
+  --fs-title: 40px;
+  --fs-filter: 32px;
+  --fs-btn: 28px;
+  --fs-body: 14px;
+
+  --ls-title: -0.8px;
+  --ls-filter: -0.64px;
+  --ls-btn: -0.56px;
+
+  /* ── Border radius ── */
+  --r-xs: 2px;
+  --r-sm: 4px;
+  --r-md: 6px;
+  --r-lg: 10px; /* boutons principaux — aligné dashboard */
+
+  /* ── Icônes ── */
+  --icon-size: 48px;
+
+  /* ── Boutons principaux ── */
+  --btn-w: 220px;
+  --btn-h: 50px;
+
+  /* ── Largeur sidebar droite ── */
+  --sw: 280px;
+
+  /* ── Polices ── */
+  --fd: "Yanone Kaffeesatz", sans-serif; /* display / titres gras */
+  --fb: "Source Sans Pro", sans-serif; /* corps de texte */
+
+  /* ── Ombres portées légères ── */
+  --sh-sm: 0 1px 4px rgba(0, 0, 0, 0.1);
+  --sh-md: 0 4px 16px rgba(0, 0, 0, 0.14);
+}
+
+/* ── Reset global ── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--fb);
+  background: var(--surface);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Scrollbar fine ── */
+::-webkit-scrollbar {
+  width: 3px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--cream3);
+  border-radius: 2px;
+}
+
+/* ── Utilitaire fade-in ── */
+.fade-in {
+  animation: fi 0.25s ease;
+}
+@keyframes fi {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
