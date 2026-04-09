@@ -15,7 +15,10 @@ const io = new Server(server, { cors: { origin: "*" } });
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "public")));
+app.use('/screen', express.static(path.join(__dirname, 'public/screen')));
+app.use('/mobile', express.static(path.join(__dirname, 'public/mobile')));
+app.get('/', (req, res) => res.redirect('/screen'));
+app.get('/admin', (req, res) => res.redirect('/screen'));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/pulse";
@@ -63,6 +66,7 @@ const MediaSchema = new mongoose.Schema({
 const Media = mongoose.model("Media", MediaSchema);
 
 const CoworkerSchema = new mongoose.Schema({
+  logo: { type: String, default: '' },
   name: { type: String, required: true },
   company: { type: String, default: "" },
   floor: { type: String, default: "" },
@@ -415,6 +419,27 @@ app.get("/api/loop/status", async (req, res) => {
     const question = await Question.findOne({ active: true });
     res.json({ posts, medias, coworkers, alert, question });
   } catch (err) { res.status(500).json({ message: "Erreur serveur." }); }
+});
+
+// Upload logo startup
+app.post('/api/coworkers/upload-logo', upload.single('logo'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ message: 'Fichier requis.' });
+    res.json({ url: '/uploads/' + req.file.filename });
+  } catch(err) { res.status(500).json({ message: 'Erreur upload.' }); }
+});
+
+// Météo proxy
+app.get('/api/weather', async (req, res) => {
+  try {
+    const https = require('https');
+    const url = 'https://api.open-meteo.com/v1/forecast?latitude=47.9029&longitude=1.9039&current=temperature_2m,wind_speed_10m,weather_code,relative_humidity_2m&wind_speed_unit=kmh&timezone=Europe/Paris';
+    https.get(url, r => {
+      let data = '';
+      r.on('data', chunk => data += chunk);
+      r.on('end', () => res.json(JSON.parse(data)));
+    }).on('error', () => res.status(500).json({ message: 'Erreur météo' }));
+  } catch(err) { res.status(500).json({ message: 'Erreur serveur.' }); }
 });
 
 // SOCKET.IO 

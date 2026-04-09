@@ -25,7 +25,7 @@
       `${DAYS[n.getDay()]} ${n.getDate()} ${MONTHS[n.getMonth()]}`;
     document.getElementById('sbTime').textContent =
       `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
-    if (n.getDate() !== lastDay) { lastDay = n.getDate(); updateQuestion(); }
+    if (n.getDate() !== lastDay) { lastDay = n.getDate(); if (typeof D !== 'undefined' && D.questions) updateQuestion(); }
   }
 
   tick();
@@ -115,13 +115,12 @@ function renderVotes() {
  */
 async function fetchWeather() {
   try {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${WEATHER_LAT}&longitude=${WEATHER_LON}&current=temperature_2m,weathercode,windspeed_10m,relativehumidity_2m&timezone=auto`;
-    const r   = await fetch(url);
-    const d   = await r.json();
-    const c   = d.current;
+    const r = await fetch('/api/weather');
+    const d = await r.json();
+    const c = d.current;
     document.getElementById('tempDisplay').textContent   = `${Math.round(c.temperature_2m)}°C`;
-    document.getElementById('weatherIcon').textContent   = wIcon(c.weathercode);
-    document.getElementById('weatherDetail').textContent = `Vent ${Math.round(c.windspeed_10m)} km/h · Hum. ${c.relativehumidity_2m}%`;
+    document.getElementById('weatherIcon').textContent   = wIcon(c.weather_code);
+    document.getElementById('weatherDetail').textContent = `Vent ${Math.round(c.wind_speed_10m)} km/h · Hum. ${c.relative_humidity_2m}%`;
   } catch (e) {
     document.getElementById('weatherDetail').textContent = 'Météo indisponible';
   }

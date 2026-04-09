@@ -233,14 +233,30 @@
 <script src="js/drawer.js"></script>
 
 <script>
+  
   /* ── Initialisation au chargement ── */
   async function initApp() {
-    D = await loadData();   /* charge depuis IndexedDB (ou migration localStorage) */
-    updateQuestion();       /* affiche la question du jour */
-    renderVotes();          /* affiche les votes en sidebar */
-    renderSlideshow();      /* affiche la première diapositive */
+    D = await loadData();
+    await syncFromAPI();
+    updateQuestion();
+    renderVotes();
+    renderSlideshow();
+    // Re-sync toutes les 30 secondes pour rattraper ce qui aurait été manqué
+    setInterval(syncFromAPI, 30000);
   }
   initApp();
+</script>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+  socket.on('post-updated', syncFromAPI);
+  socket.on('post-deleted', syncFromAPI);
+  socket.on('wall-cleared', syncFromAPI);
+  socket.on('media-updated', syncFromAPI);
+  socket.on('question-updated', syncFromAPI);
+  socket.on('alert', syncFromAPI);
+  socket.on('alert-cleared', syncFromAPI);
+  socket.on('new-post', syncFromAPI);
 </script>
 
 </body>

@@ -22,7 +22,8 @@ services:
     depends_on:
       - mongo
     volumes:
-      - ./server/public:/app/public
+      - ./server/public/screen:/app/public/screen
+      - ./server/public/mobile:/app/public/mobile
       - uploads_data:/app/uploads
 
 volumes:

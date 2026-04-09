@@ -765,10 +765,18 @@ function deleteItem(section, idx) {
  * acceptChat(idx)
  * Accepte une réponse à la question du jour.
  */
-function acceptChat(idx) {
+async function acceptChat(idx) {
   const pending = D.pendingAnswers || [];
   const a = pending[idx];
   if (!a) return;
+  // Si le post vient de MongoDB, on met à jour via l'API
+  if (a._id) {
+    await fetch(`/api/posts/${a._id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'approved' })
+    });
+  }
   D.votes.push({ name: a.name, text: a.text });
   D.prevAnswers.push({ name: a.name, text: a.text, question: a.question });
   pending.splice(idx, 1);
@@ -782,9 +790,17 @@ function acceptChat(idx) {
  * rejectChat(idx)
  * Rejette une réponse à la question du jour.
  */
-function rejectChat(idx) {
+async function rejectChat(idx) {
   const pending = D.pendingAnswers || [];
-  if (!pending[idx]) return;
+  const a = pending[idx];
+  if (!a) return;
+  if (a._id) {
+    await fetch(`/api/posts/${a._id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'rejected' })
+    });
+  }
   pending.splice(idx, 1);
   saveData();
   renderSectionList('chat');
@@ -799,9 +815,16 @@ function rejectChat(idx) {
  * acceptNews(idx)
  * Accepte une nouveauté soumise via QR et l'ajoute dans D.news.
  */
-function acceptNews(idx) {
+async function acceptNews(idx) {
   const n = (D.pendingNews || [])[idx];
   if (!n) return;
+  if (n._id) {
+    await fetch(`/api/annonces/${n._id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'approved' })
+    });
+  }
   n.accepted = true;
   if (!D.news) D.news = [];
   if (n.text) D.news.push(n.text);
@@ -815,9 +838,16 @@ function acceptNews(idx) {
  * rejectNews(idx)
  * Rejette une nouveauté soumise via QR.
  */
-function rejectNews(idx) {
+async function rejectNews(idx) {
   const n = (D.pendingNews || [])[idx];
   if (!n) return;
+  if (n._id) {
+    await fetch(`/api/annonces/${n._id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'rejected' })
+    });
+  }
   n.rejected = true;
   saveData();
   renderSectionList('news');

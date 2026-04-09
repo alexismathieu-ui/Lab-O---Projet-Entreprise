@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lab'O Village by CA — Totem</title>
+  <!--
+    ============================================================
+    totem.html — Affichage totem (mode écran uniquement)
+    ============================================================
+    Copie de index.html avec :
+      - Suppression de l'écran de connexion
+      - Suppression de la barre admin
+      - Suppression du drawer de modération
+      - Suppression de la navigation onglets
+      - Démarrage automatique en mode écran dès le chargement
+    Les fichiers CSS et JS sont les mêmes que pour index.html.
+    ============================================================
+  -->
+  <link rel="stylesheet" href="css/variables.css"/>
+  <link rel="stylesheet" href="css/layout.css"/>
+  <link rel="stylesheet" href="css/slides.css"/>
+  <link rel="stylesheet" href="css/components.css"/>
+
+  <style>
+    /* Force le mode écran dès le départ : cache tout ce qui est admin */
+    #loginScreen,
+    #adminBar,
+    #topNav,
+    #drwOv,
+    #drawer,
+    #qrPage {
+      display: none !important;
+    }
+
+    /* Le body et .main prennent toute la hauteur sans la barre admin */
+    body {
+      padding-top: 0 !important;
+    }
+
+    .main {
+      top: 0 !important;
+      height: 100vh !important;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════
+     GRILLE PRINCIPALE (contenu + sidebar)
+════════════════════════════════════════ -->
+<div class="main">
+
+  <!-- ZONE DE CONTENU (diaporama) -->
+  <div class="content" id="mainContent">
+
+    <!-- Ruban animé SVG en arrière-plan -->
+    <div class="ribbon-canvas" id="ribbonCanvas"></div>
+
+    <!-- Overlay transition sweep (balayage entre slides) -->
+    <div class="sweep-overlay" id="sweepOverlay">
+      <div class="sweep-a"></div>
+      <div class="sweep-b"></div>
+    </div>
+
+    <!-- Overlay transition circle burst (changement d'onglet) -->
+    <div class="circle-overlay" id="circleOverlay"></div>
+
+    <!-- Hero : barre rouge déco + titre + compteur -->
+    <div class="hero">
+      <h1 id="heroTitle">Découvrez les <span>Startups</span><br>du Lab'O Village by CA</h1>
+      <div class="hero-sub" id="heroSub"></div>
+    </div>
+
+    <!-- Points de navigation -->
+    <div class="nav-dots" id="navDots"></div>
+    <!-- Barre de progression temporelle -->
+    <div class="pbar"><div class="pbar-fill" id="pbarFill"></div></div>
+
+    <!-- Zone d'injection des diapositives -->
+    <div class="slide-wrap" id="slideWrap"></div>
+
+    <!-- Bannière rouge + ticker bas de page -->
+    <div class="bot-banner">
+      <h3 id="bannerTitle">Nouveauté LAB'O le Village by CA</h3>
+      <div class="bot-sep"></div>
+      <div class="ticker-wrap">
+        <div class="ticker-inner" id="tickerInner"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR DROITE -->
+  <div class="sidebar">
+
+    <!-- QR "Ajoutez votre annonce" — en haut -->
+    <div class="sb-announce">
+      <div class="announce-label">
+        Ajoutez votre annonce !
+        <span>Scanner le QR code</span>
+      </div>
+      <div class="qrbox-sm" title="Scanner pour poster une annonce">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="34" height="34">
+          <rect x="10" y="10" width="30" height="30" fill="none" stroke="white" stroke-width="6" rx="2"/>
+          <rect x="18" y="18" width="14" height="14" fill="white" rx="1"/>
+          <rect x="60" y="10" width="30" height="30" fill="none" stroke="white" stroke-width="6" rx="2"/>
+          <rect x="68" y="18" width="14" height="14" fill="white" rx="1"/>
+          <rect x="10" y="60" width="30" height="30" fill="none" stroke="white" stroke-width="6" rx="2"/>
+          <rect x="18" y="68" width="14" height="14" fill="white" rx="1"/>
+          <rect x="60" y="60" width="10" height="10" fill="white" rx="1"/>
+          <rect x="74" y="60" width="10" height="10" fill="white" rx="1"/>
+          <rect x="60" y="74" width="10" height="10" fill="white" rx="1"/>
+          <rect x="74" y="74" width="16" height="10" fill="white" rx="1"/>
+          <rect x="74" y="88" width="10" height="2" fill="white"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Question du jour + ⭐ réponses précédentes -->
+    <div class="sb-q">
+      <div class="sec-title">Question du jour</div>
+      <div class="q-text" id="qText">Chargement...</div>
+      <button class="star-btn" id="starBtn" onclick="togglePrev()" title="Réponses précédentes">⭐</button>
+      <div class="prev-answers" id="prevAnswers"><ul id="prevList"></ul></div>
+    </div>
+
+    <!-- Votes / réponses acceptées -->
+    <div class="sb-votes" id="sbVotes"></div>
+
+    <!-- Horloge date + heure — en bas -->
+    <div class="sb-clock">
+      <div class="sb-date" id="sbDate">—</div>
+      <div class="sb-time" id="sbTime">00:00</div>
+    </div>
+
+    <!-- Météo (API Open-Meteo) — en bas -->
+    <div class="sb-weather">
+      <div class="sb-weather-main">
+        <span id="weatherIcon">🌤</span>
+        <span id="tempDisplay">—°C</span>
+      </div>
+      <div class="sb-weather-detail" id="weatherDetail">Chargement...</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SCRIPTS (ordre d'import important)
+     config → store → auth → slideshow → sidebar → drawer
+════════════════════════════════════════ -->
+<script src="js/idb.js"></script>
+<script src="js/config.js"></script>
+<script src="js/store.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/slideshow.js"></script>
+<script src="js/sidebar.js"></script>
+<script src="js/drawer.js"></script>
+
+<script>
+  /* ── Initialisation totem : démarrage direct en mode écran ── */
+  async function initTotem() {
+    D = await loadData();
+    await syncFromAPI();
+    updateQuestion();
+    renderVotes();
+
+    /* Démarre directement en mode écran sans passer par le login */
+    enterScreen();
+
+    /* Re-sync toutes les 30 secondes */
+    setInterval(syncFromAPI, 30000);
+  }
+  initTotem();
+</script>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+  socket.on('post-updated',      syncFromAPI);
+  socket.on('post-deleted',      syncFromAPI);
+  socket.on('wall-cleared',      syncFromAPI);
+  socket.on('media-updated',     syncFromAPI);
+  socket.on('question-updated',  syncFromAPI);
+  socket.on('alert',             syncFromAPI);
+  socket.on('alert-cleared',     syncFromAPI);
+  socket.on('new-post',          syncFromAPI);
+</script>
+
+</body>
+</html>

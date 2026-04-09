@@ -627,27 +627,8 @@
             >*Réponse obligatoire</span
           >
 
-          <!-- Animation de Message dropdown (visual selector) -->
-          <div
-            class="animation-select"
-            role="button"
-            tabindex="0"
-            aria-haspopup="listbox"
-            aria-expanded="false"
-            aria-label="Animation de Message"
-          ></div>
-          <div class="animation-select__chevron" aria-hidden="true">
-            <img
-              src="https://www.figma.com/api/mcp/asset/76eff9ea-8c1c-4f1a-8bcb-6f1ecfa75edc"
-              alt=""
-            />
-          </div>
-          <span class="animation-select__text" aria-hidden="true"
-            >Animation de Message</span
-          >
-
           <!-- Submit -->
-          <button class="submit-btn" type="submit">Envoyer</button>
+          <button class="submit-btn" onclick="envoyerReponse()" type="button">Envoyer</button>
         </form>
 
         <!-- ── Home Indicator ──────────────────────────────────── -->
@@ -688,6 +669,84 @@
           }
         });
       })();
+    </script>
+    <script>
+    async function envoyerReponse() {
+      const name = document.getElementById('field-name').value.trim();
+      const text = document.getElementById('field-message').value.trim();
+      if (!text) { alert('Écris ta réponse !'); return; }
+      try {
+        const res = await fetch('/api/posts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, author: name || 'Anonyme', category: 'Info' })
+        });
+        const data = await res.json();
+        if (data._id) {
+          // Affiche confirmation — crée l'élément s'il n'existe pas
+          let ok = document.getElementById('qrSuccess');
+          if (!ok) {
+            ok = document.createElement('p');
+            ok.id = 'qrSuccess';
+            ok.style.cssText = 'position:absolute;bottom:80px;left:0;width:100%;text-align:center;font-family:var(--font-primary);font-weight:600;font-size:20px;color:#16a34a';
+            document.querySelector('.phone').appendChild(ok);
+          }
+          ok.textContent = '✓ Message envoyé, en attente de validation !';
+          ok.style.display = 'block';
+          document.getElementById('field-name').value = '';
+          document.getElementById('field-message').value = '';
+          setTimeout(() => { ok.style.display = 'none'; }, 3000);
+        } else {
+          alert('Erreur : ' + (data.message || 'inconnue'));
+        }
+      } catch(e) { alert('Erreur serveur, réessaie.'); }
+    }
+
+    // Charge la question depuis le backend
+    async function loadQuestion() {
+      try {
+        // 1. Essai : questions mensuelles depuis le store IndexedDB de l'écran
+        // On calcule localement : même logique que todayQuestion()
+        const IDB_NAME  = 'labovca_store';
+        const IDB_STORE = 'data';
+        const LS_KEY    = 'labovca_data_v6';
+
+        const q = await new Promise((resolve) => {
+          const req = indexedDB.open(IDB_NAME, 1);
+          req.onsuccess = e => {
+            const db = e.target.result;
+            const tx = db.transaction(IDB_STORE, 'readonly');
+            const r  = tx.objectStore(IDB_STORE).get(LS_KEY);
+            r.onsuccess = ev => resolve(ev.target.result);
+            r.onerror   = () => resolve(null);
+          };
+          req.onerror = () => resolve(null);
+        });
+
+        if (q && q.questions) {
+          const n   = new Date();
+          const qs  = q.questions[n.getMonth() + 1];
+          if (qs && qs.length) {
+            const question = qs[(n.getDate() - 1) % qs.length];
+            const el = document.querySelector('.section-question');
+            if (el) el.textContent = 'Question : ' + question;
+            return;
+          }
+        }
+
+        // 2. Fallback : question forcée depuis MongoDB
+        const res = await fetch('/api/question');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data && data.text) {
+          const el = document.querySelector('.section-question');
+          if (el) el.textContent = 'Question : ' + data.text;
+        }
+      } catch(e) {
+        console.warn('Chargement question échoué:', e);
+      }
+    }
+    loadQuestion();
     </script>
   </body>
 </html>

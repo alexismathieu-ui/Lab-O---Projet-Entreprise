@@ -44,6 +44,70 @@ async function loadData() {
   return JSON.parse(JSON.stringify(DEFAULT_DATA));
 }
 
+async function syncFromAPI() {
+  try {
+    const [startups, annonces, question, alert, ticker] = await Promise.all([
+      fetch('/api/coworkers').then(r => r.json()),
+      fetch('/api/annonces?status=approved').then(r => r.json()),
+      fetch('/api/question').then(r => r.json()),
+      fetch('/api/alert').then(r => r.json()),
+      fetch('/api/posts?status=approved').then(r => r.json()),
+    ]);
+    // Mappe les coworkers (startups) au format attendu par buildStartupSlide
+    D.startups = (startups || []).map(c => ({
+      name: c.company,
+      floor: c.floor,
+      logo: c.logo || c.avatar || '',
+      ceo: c.name,
+      description: c.bio,
+      contact: c.contact,
+      website: c.website,
+    }));
+    D.announcements = (annonces || []).map(a => ({
+      name: a.title,
+      description: a.description,
+    }));
+if (question && question.text) D.questions._active = question.text;
+    // Si le mois courant a des questions dans le drawer, on ignore _active
+    const moisCourant = new Date().getMonth() + 1;
+    if (D.questions && D.questions[moisCourant] && D.questions[moisCourant].length) {
+      delete D.questions._active;
+    }
+    // Sync des posts en attente → drawer admin
+    const pendingPosts = await fetch('/api/posts?status=pending').then(r => r.json());
+    if (Array.isArray(pendingPosts)) {
+      D.pendingAnswers = pendingPosts.map(p => ({
+        name: p.author || 'Anonyme',
+        text: p.text,
+        question: D.questions._active || '',
+        type: 'chat',
+        date: p.createdAt,
+        _id: p._id,
+        accepted: p.status === 'approved',
+        rejected: p.status === 'rejected',
+      }));
+    }
+
+    // Sync des annonces en attente → drawer admin
+    const pendingAnnonces = await fetch('/api/annonces?status=pending').then(r => r.json());
+    if (Array.isArray(pendingAnnonces)) {
+      D.pendingNews = pendingAnnonces.map(a => ({
+        text: a.title + (a.description ? ' — ' + a.description : ''),
+        name: a.author || 'Anonyme',
+        date: a.createdAt,
+        _id: a._id,
+        accepted: a.status === 'approved',
+        rejected: a.status === 'rejected',
+      }));
+    }
+
+    saveData();
+    renderSlideshow();
+    if (typeof updateQuestion === 'function') updateQuestion();
+    if (typeof updateNotifBadge === 'function') updateNotifBadge();
+  } catch(e) { console.warn('Sync API échouée:', e); }
+}
+
 /* ── État global partagé par tous les modules ── */
 let D = {}; /* rempli par initApp() dans index.html */
 
@@ -76,9 +140,15 @@ function h(s) {
  * @returns {string}
  */
 function todayQuestion() {
-  const n  = new Date();
-  const qs = D.questions[n.getMonth() + 1] || D.questions[3];
-  return qs[(n.getDate() - 1) % qs.length] || qs[0];
+  const n   = new Date();
+  const qs  = D.questions && D.questions[n.getMonth() + 1];
+  // Si le mois a des questions → on prend celle du jour (boucle sur la liste)
+  if (qs && qs.length) return qs[(n.getDate() - 1) % qs.length];
+  // Sinon fallback sur la question forcée depuis MongoDB
+  if (D.questions && D.questions._active) return D.questions._active;
+  // Dernier fallback : avril
+  const fallback = D.questions && D.questions[4];
+  return (fallback && fallback[0]) || 'Quelle est votre actualité du moment ?';
 }
 
 /**
