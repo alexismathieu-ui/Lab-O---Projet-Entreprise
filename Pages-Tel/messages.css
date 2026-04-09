@@ -1,0 +1,538 @@
+/* ═══════════════════════════════════════════════════════════
+   DESIGN TOKENS — extracted from Figma node 65:2135
+   Lab'o White: #F8F2EB  |  Lab'o Red: #E53530  |  Lab'o Black: #050707
+═══════════════════════════════════════════════════════════ */
+:root {
+  /* Colors */
+  --color-labo-white: #f8f2eb;
+  --color-labo-red: #e53530;
+  --color-labo-black: #050707;
+  --color-placeholder: rgba(30, 30, 30, 0.5);
+  --color-page-bg: #ddd5c8;
+
+  /* Typography */
+  --font-primary: "Yanone Kaffeesatz", sans-serif;
+  --fw-semibold: 600;
+  --fw-light: 300;
+
+  --fs-main: 28px;
+  --fs-btn: 24px;
+  --fs-required: 10px;
+
+  --lh-main: 1.4;
+  --ls-main: -0.56px;
+  --ls-btn: -0.48px;
+  --ls-required: -0.2px;
+
+  /* Phone canvas — derived from Figma frame proportions        */
+  /* Percentage anchors verified against absolute px positions: */
+  /* 25.43 % × 1050 = 267 px  (title, above search-bar@366px)  */
+  --phone-w: 402px;
+  --phone-h: 1050px;
+
+  /* Shadows */
+  --shadow-btn: 2px 4px 4px 0px rgba(0, 0, 0, 0.25);
+
+  /* Border */
+  --border-red: 2px solid var(--color-labo-red);
+}
+
+/* ─── Reset ──────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ─── Page ───────────────────────────────────────────────── */
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+}
+
+body {
+  background-color: var(--color-page-bg);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-primary);
+}
+
+/* ─── Phone Scene (centering wrapper) ────────────────────── */
+.phone-scene {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+/* ─── Phone Shell ────────────────────────────────────────── */
+.phone {
+  position: relative;
+  width: var(--phone-w);
+  height: var(--phone-h);
+  background-color: var(--color-labo-white);
+  border-radius: 50px;
+  box-shadow:
+    0 0 0 10px #1a1a1a,
+    0 0 0 12px #3a3a3a,
+    0 24px 80px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+/* ════════════════════════════════════════════════════════════
+   STATUS BAR  (top: 0, height: 72px)
+════════════════════════════════════════════════════════════ */
+.status-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 402px;
+  height: 72px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.status-bar__time {
+  position: absolute;
+  left: 38px;
+  top: 25px;
+  width: 54px;
+  height: 21px;
+}
+.status-bar__time img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.status-bar__right {
+  position: absolute;
+  right: 30.34px;
+  top: 29px;
+  width: 66.661px;
+  height: 11.336px;
+}
+.status-bar__right img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* ════════════════════════════════════════════════════════════
+   LOGO  (top: 126px, left: 144px, 114 × 114px)
+════════════════════════════════════════════════════════════ */
+.logo {
+  position: absolute;
+  top: 126px;
+  left: 144px;
+  width: 114px;
+  height: 114px;
+}
+.logo__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+/* ════════════════════════════════════════════════════════════
+   SECTION TITLE  — "Répondre à la question du jour"
+   top: 25.43% × 1050 = 267px | left: 1.49% × 402 = 6px
+   right: 33.08% × 402 = 133px → width: 402-133-6 = 263px
+════════════════════════════════════════════════════════════ */
+.section-title {
+  position: absolute;
+  top: 267px;
+  left: 6px;
+  width: 263px;
+  font-family: var(--font-primary);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-main);
+  color: var(--color-labo-black);
+  letter-spacing: var(--ls-main);
+  line-height: var(--lh-main);
+}
+
+/* Underline — top: 27.94% × 1050 = 293px
+   left: 2.99% × 402 = 12px | right: 38.81% × 402 = 156px → w: 234px
+   inner inset(-2px) → height: 2px                                    */
+.section-title__underline {
+  position: absolute;
+  top: 293px;
+  left: 12px;
+  width: 234px;
+  height: 2px;
+  background-color: var(--color-labo-black);
+}
+
+/* ════════════════════════════════════════════════════════════
+   SECTION QUESTION  — "Question : Ça va aujourd'hui ?"
+   top: 30.06% × 1050 = 316px | left: 22.89% × 402 = 92px
+   right: 20.15% × 402 = 81px → width: 229px
+════════════════════════════════════════════════════════════ */
+.section-question {
+  position: absolute;
+  top: 316px;
+  left: 92px;
+  width: 229px;
+  font-family: var(--font-primary);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-main);
+  color: var(--color-labo-black);
+  letter-spacing: var(--ls-main);
+  line-height: var(--lh-main);
+}
+
+/* Underline — top: 32.56% × 1050 = 342px
+   flex-centered, w-[226px] h-px, rotate(0.25deg) ≈ horizontal        */
+.section-question__underline {
+  position: absolute;
+  top: 342px;
+  left: 98px; /* 24.38% × 402 */
+  width: 226px;
+  height: 1px;
+  background-color: var(--color-labo-black);
+  transform: rotate(0.25deg);
+}
+
+/* ════════════════════════════════════════════════════════════
+   FORM FIELDS
+════════════════════════════════════════════════════════════ */
+
+/* ── Name input  (top: 366px, left: 54px, 294 × 48px) ─────── */
+.field {
+  position: absolute;
+  left: 54px;
+  width: 294px;
+}
+.field--name {
+  top: 366px;
+  height: 48px;
+}
+.field--message {
+  top: 474px;
+  height: 305px;
+}
+
+.field__input,
+.field__textarea {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border: var(--border-red);
+  border-radius: 0;
+  outline: none;
+  font-family: var(--font-primary);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-main);
+  color: var(--color-labo-black);
+  letter-spacing: var(--ls-main);
+  line-height: var(--lh-main);
+  padding: 0 9px; /* 63.32px text left − 54px field left = 9.32px */
+  resize: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.field__textarea {
+  padding-top: 11px; /* placeholder center: 498.95−474 = 24.95 → ~(48/2)px from top */
+  vertical-align: top;
+}
+
+.field__input::placeholder,
+.field__textarea::placeholder {
+  color: var(--color-placeholder);
+  opacity: 1;
+}
+
+/* ── Required labels ────────────────────────────────────── */
+/* *Réponse obligatoire — Yanone Kaffeesatz Light 10px #E53530 */
+.required {
+  position: absolute;
+  left: 66px;
+  font-family: var(--font-primary);
+  font-weight: var(--fw-light);
+  font-size: var(--fs-required);
+  color: var(--color-labo-red);
+  letter-spacing: var(--ls-required);
+  white-space: nowrap;
+  transform: translateY(
+    -50%
+  ); /* element is vertically centered at its top value */
+}
+.required--name {
+  top: 422px;
+}
+.required--message {
+  top: 787px;
+}
+
+/* ════════════════════════════════════════════════════════════
+   ANIMATION DROPDOWN
+   border box: top:839 left:53 w:296 h:50 r:10 border-red
+════════════════════════════════════════════════════════════ */
+.animation-select {
+  position: absolute;
+  top: 839px;
+  left: 53px;
+  width: 296px;
+  height: 50px;
+  border: var(--border-red);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+/* Chevron icon: top:849 left:62 w:30 h:30 (absolute in phone) */
+.animation-select__chevron {
+  position: absolute;
+  top: 849px;
+  left: 62px;
+  width: 30px;
+  height: 30px;
+  overflow: hidden;
+  pointer-events: none;
+}
+.animation-select__chevron img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Text: vertically centered at y=865.5px (839+26.5), left:102 w:187 h:27 */
+.animation-select__text {
+  position: absolute;
+  top: 865.5px;
+  left: 102px;
+  width: 187px;
+  height: 27px;
+  transform: translateY(-50%);
+  font-family: var(--font-primary);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-main);
+  color: var(--color-placeholder);
+  letter-spacing: var(--ls-main);
+  line-height: var(--lh-main);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* ════════════════════════════════════════════════════════════
+   SUBMIT BUTTON — "Envoyer"
+   top:942 left:112 w:177 h:50 | font:24px SemiBold #050707
+════════════════════════════════════════════════════════════ */
+.submit-btn {
+  position: absolute;
+  top: 942px;
+  left: 112px;
+  width: 177px;
+  height: 50px;
+  background-color: var(--color-labo-white);
+  border: var(--border-red);
+  border-radius: 10px;
+  box-shadow: var(--shadow-btn);
+  font-family: var(--font-primary);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-btn);
+  color: var(--color-labo-black);
+  letter-spacing: var(--ls-btn);
+  line-height: var(--lh-main);
+  text-align: center;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  transition:
+    opacity 0.12s ease,
+    transform 0.12s ease;
+}
+.submit-btn:hover {
+  opacity: 0.88;
+}
+.submit-btn:active {
+  transform: scale(0.97);
+  opacity: 0.8;
+}
+
+/* ════════════════════════════════════════════════════════════
+   HOME INDICATOR  (bottom:10px, centered, 161 × 6px)
+════════════════════════════════════════════════════════════ */
+.home-indicator {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 161px;
+  height: 6px;
+  background-color: var(--color-labo-black);
+  border-radius: 100px;
+}
+
+/* ════════════════════════════════════════════════════════════
+   RESPONSIVE — Tablet  ≤ 1024px
+════════════════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .phone-scene {
+    padding: 32px 16px;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+   RESPONSIVE — Mobile  ≤ 768px
+   Scale the whole phone proportionally to viewport width.
+   A --scale CSS custom property is written by JS; every
+   absolute-positioned element reads it via calc().
+════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  body {
+    background-color: var(--color-labo-white);
+    align-items: flex-start;
+  }
+
+  .phone-scene {
+    padding: 0;
+    width: 100%;
+    min-height: 100vh;
+    align-items: flex-start;
+  }
+
+  .phone {
+    --scale: 1;
+    width: 100vw;
+    height: calc(var(--phone-h) * var(--scale));
+    border-radius: 0;
+    box-shadow: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  /* ── Scale all absolutely-positioned children ─────────── */
+  .status-bar {
+    width: 100%;
+    transform: scale(var(--scale));
+    transform-origin: top left;
+  }
+
+  .logo {
+    top: calc(126px * var(--scale));
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(114px * var(--scale));
+    height: calc(114px * var(--scale));
+  }
+
+  .section-title {
+    top: calc(267px * var(--scale));
+    left: calc(6px * var(--scale));
+    width: calc(263px * var(--scale));
+    font-size: calc(var(--fs-main) * var(--scale));
+    letter-spacing: calc(var(--ls-main) * var(--scale));
+  }
+
+  .section-title__underline {
+    top: calc(293px * var(--scale));
+    left: calc(12px * var(--scale));
+    width: calc(234px * var(--scale));
+    height: calc(2px * var(--scale));
+  }
+
+  .section-question {
+    top: calc(316px * var(--scale));
+    left: calc(92px * var(--scale));
+    width: calc(229px * var(--scale));
+    font-size: calc(var(--fs-main) * var(--scale));
+    letter-spacing: calc(var(--ls-main) * var(--scale));
+  }
+
+  .section-question__underline {
+    top: calc(342px * var(--scale));
+    left: calc(98px * var(--scale));
+    width: calc(226px * var(--scale));
+  }
+
+  .field {
+    left: calc(54px * var(--scale));
+    width: calc(294px * var(--scale));
+  }
+  .field--name {
+    top: calc(366px * var(--scale));
+    height: calc(48px * var(--scale));
+  }
+  .field--message {
+    top: calc(474px * var(--scale));
+    height: calc(305px * var(--scale));
+  }
+  .field__input,
+  .field__textarea {
+    font-size: calc(var(--fs-main) * var(--scale));
+    padding: 0 calc(9px * var(--scale));
+    letter-spacing: calc(var(--ls-main) * var(--scale));
+  }
+  .field__textarea {
+    padding-top: calc(11px * var(--scale));
+  }
+
+  .required {
+    left: calc(66px * var(--scale));
+    font-size: calc(var(--fs-required) * var(--scale));
+  }
+  .required--name {
+    top: calc(422px * var(--scale));
+  }
+  .required--message {
+    top: calc(787px * var(--scale));
+  }
+
+  .animation-select {
+    top: calc(839px * var(--scale));
+    left: calc(53px * var(--scale));
+    width: calc(296px * var(--scale));
+    height: calc(50px * var(--scale));
+    border-radius: calc(10px * var(--scale));
+  }
+  .animation-select__chevron {
+    top: calc(849px * var(--scale));
+    left: calc(62px * var(--scale));
+    width: calc(30px * var(--scale));
+    height: calc(30px * var(--scale));
+  }
+  .animation-select__text {
+    top: calc(865.5px * var(--scale));
+    left: calc(102px * var(--scale));
+    width: calc(187px * var(--scale));
+    height: calc(27px * var(--scale));
+    font-size: calc(var(--fs-main) * var(--scale));
+    letter-spacing: calc(var(--ls-main) * var(--scale));
+  }
+
+  .submit-btn {
+    top: calc(942px * var(--scale));
+    left: calc(112px * var(--scale));
+    width: calc(177px * var(--scale));
+    height: calc(50px * var(--scale));
+    border-radius: calc(10px * var(--scale));
+    font-size: calc(var(--fs-btn) * var(--scale));
+    letter-spacing: calc(var(--ls-btn) * var(--scale));
+  }
+  .submit-btn:active {
+    transform: scale(0.97);
+  }
+
+  .home-indicator {
+    width: calc(161px * var(--scale));
+    height: calc(6px * var(--scale));
+    bottom: calc(10px * var(--scale));
+    border-radius: 100px;
+  }
+}
