@@ -87,11 +87,11 @@ function buildSlideEl(slide) {
  */
 function buildStartupSlide(s) {
   const qrBlock = s.qrUrl
-    ? `<div class="card-qr-footer">
-         <div class="qrlbl-footer">En savoir<br>plus :</div>
-         <div class="qrbox">
-           <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(s.qrUrl)}"
-                alt="QR code" width="70" height="70"/>
+    ? `<div class="card-qr-inline">
+         <div class="qrlbl-inline">En savoir plus :</div>
+         <div class="qrbox-inline">
+           <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(s.qrUrl)}"
+                alt="QR code" width="90" height="90"/>
          </div>
        </div>`
     : '';
@@ -122,6 +122,7 @@ function buildStartupSlide(s) {
         </div>
       </div>
       <div class="co-desc">${h(s.desc || '')}</div>
+      ${qrBlock}
     </div>
   </div>
   <div class="card-footer">
@@ -131,7 +132,6 @@ function buildStartupSlide(s) {
         <div class="mrow"><span class="mlbl">Contact :</span><span class="mval">${h(s.contact || '—')}</span></div>
         <div class="mrow"><span class="mlbl">Site Web :</span><span class="mval">${h(s.web || '—')}</span></div>
       </div>
-      ${qrBlock}
     </div>
   </div>`;
 }
