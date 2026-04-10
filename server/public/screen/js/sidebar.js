@@ -25,7 +25,13 @@
       `${DAYS[n.getDay()]} ${n.getDate()} ${MONTHS[n.getMonth()]}`;
     document.getElementById('sbTime').textContent =
       `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
-    if (n.getDate() !== lastDay) { lastDay = n.getDate(); if (typeof D !== 'undefined' && D.questions) updateQuestion(); }
+    if (n.getDate() !== lastDay) {
+      const isFirstLoad = (lastDay === -1);
+      lastDay = n.getDate();
+      if (typeof D !== 'undefined' && D.questions) updateQuestion();
+      // Vider les votes et réponses du jour précédent (sauf au premier chargement)
+      if (!isFirstLoad && typeof clearDailyData === 'function') clearDailyData();
+    }
   }
 
   tick();

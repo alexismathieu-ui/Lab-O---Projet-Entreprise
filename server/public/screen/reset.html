@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Reset — Lab'O Admin</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:system-ui,sans-serif;background:#fff0f0;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+    .box{background:white;border-radius:16px;padding:40px 36px;max-width:480px;width:100%;box-shadow:0 4px 32px rgba(0,0,0,.10)}
+    h1{font-size:22px;font-weight:800;color:#e53530;margin-bottom:8px}
+    p{font-size:13px;color:#666;line-height:1.6;margin-bottom:20px}
+    .warn{background:#fff8f0;border:1.5px solid #f97316;border-radius:8px;padding:14px 16px;font-size:12px;color:#c2410c;font-weight:600;margin-bottom:24px;line-height:1.5}
+    input{width:100%;padding:12px 14px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:14px;outline:none}
+    input:focus{border-color:#e53530}
+    button{width:100%;padding:13px;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:10px;transition:opacity .15s}
+    .btn-red{background:#e53530;color:white}
+    .btn-red:hover{opacity:.88}
+    .btn-idb{background:#1d4ed8;color:white}
+    .btn-idb:hover{opacity:.88}
+    .btn-both{background:#7c3aed;color:white}
+    .btn-both:hover{opacity:.88}
+    .result{margin-top:16px;padding:12px 16px;border-radius:8px;font-size:13px;font-weight:600;display:none}
+    .ok{background:#f0fdf4;border:1.5px solid #86efac;color:#16a34a}
+    .err{background:#fff0f0;border:1.5px solid #fca5a5;color:#dc2626}
+    hr{border:none;border-top:1px solid #eee;margin:20px 0}
+    h2{font-size:14px;font-weight:700;color:#444;margin-bottom:12px}
+  </style>
+</head>
+<body>
+<div class="box">
+  <h1>🗑️ Reset Lab'O</h1>
+  <p>Outil de réinitialisation pour repartir sur une base propre. À utiliser une seule fois.</p>
+
+  <div class="warn">
+    ⚠️ Ces opérations sont <strong>irréversibles</strong>. Toutes les données seront supprimées définitivement.
+  </div>
+
+  <!-- Reset MongoDB -->
+  <h2>1. Réinitialiser la base de données (MongoDB)</h2>
+  <p style="margin-bottom:12px">Supprime tous les posts, annonces, coworkers, questions, alertes et médias.</p>
+  <input type="password" id="secret" placeholder="Code secret (pulse-reset-2026)"/>
+  <button class="btn-red" onclick="resetDB()">🗑️ Vider la base MongoDB</button>
+
+  <hr/>
+
+  <!-- Reset IDB local -->
+  <h2>2. Réinitialiser les données locales (navigateur)</h2>
+  <p style="margin-bottom:12px">Supprime les données IndexedDB stockées dans ce navigateur (annonces, partenaires, events, etc.).</p>
+  <button class="btn-idb" onclick="resetIDB()">🔄 Vider les données locales</button>
+
+  <hr/>
+
+  <!-- Reset tout -->
+  <h2>3. Reset complet (MongoDB + IDB)</h2>
+  <button class="btn-both" onclick="resetAll()">💥 Tout réinitialiser</button>
+
+  <div class="result" id="result"></div>
+</div>
+
+<script>
+const IDB_NAME  = 'labovca_store';
+const LS_KEY_v6 = 'labovca_data_v6';
+const LS_KEY_v7 = 'labovca_data_v7';
+
+function showResult(msg, ok) {
+  const el = document.getElementById('result');
+  el.textContent = msg;
+  el.className = 'result ' + (ok ? 'ok' : 'err');
+  el.style.display = 'block';
+}
+
+async function resetDB() {
+  const secret = document.getElementById('secret').value.trim();
+  if (!secret) { showResult('Veuillez entrer le code secret.', false); return; }
+  try {
+    const r = await fetch('/api/admin/reset-db', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ secret })
+    });
+    const d = await r.json();
+    showResult((r.ok ? '✓ ' : '✗ ') + d.message, r.ok);
+  } catch(e) { showResult('Erreur réseau : ' + e.message, false); }
+}
+
+async function resetIDB() {
+  try {
+    // Supprimer les deux versions de clé
+    localStorage.removeItem(LS_KEY_v6);
+    localStorage.removeItem(LS_KEY_v7);
+
+    // Supprimer toute la base IndexedDB
+    await new Promise((resolve, reject) => {
+      const req = indexedDB.deleteDatabase(IDB_NAME);
+      req.onsuccess = resolve;
+      req.onerror   = e => reject(e.target.error);
+      req.onblocked = () => reject(new Error('IndexedDB bloquée — ferme les autres onglets d\'abord'));
+    });
+    showResult('✓ Données locales supprimées. Rechargez l\'admin.', true);
+  } catch(e) { showResult('Erreur IDB : ' + e.message, false); }
+}
+
+async function resetAll() {
+  const secret = document.getElementById('secret').value.trim();
+  if (!secret) { showResult('Veuillez entrer le code secret pour le reset complet.', false); return; }
+  await resetDB();
+  await resetIDB();
+  showResult('✓ Reset complet effectué. Rechargez l\'admin.', true);
+}
+</script>
+</body>
+</html>

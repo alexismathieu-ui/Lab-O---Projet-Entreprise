@@ -9,14 +9,17 @@
  * Sinon → message d'erreur et reset champ.
  */
 function doLogin() {
-  if (document.getElementById('pwdInput').value === ADMIN_PWD) {
-    document.getElementById('loginScreen').classList.add('gone');
-    setTimeout(() => document.getElementById('loginScreen').style.display = 'none', 420);
+  const pwdInput    = document.getElementById('pwdInput');
+  const loginScreen = document.getElementById('loginScreen');
+  const lerr        = document.getElementById('lerr');
+  if (!pwdInput) return;
+  if (pwdInput.value === ADMIN_PWD) {
+    if (loginScreen) { loginScreen.classList.add('gone'); setTimeout(() => { loginScreen.style.display = 'none'; }, 420); }
     enterAdmin();
   } else {
-    document.getElementById('lerr').style.display = 'block';
-    document.getElementById('pwdInput').value = '';
-    document.getElementById('pwdInput').focus();
+    if (lerr)     lerr.style.display = 'block';
+    pwdInput.value = '';
+    pwdInput.focus();
   }
 }
 
@@ -28,10 +31,14 @@ function doLogin() {
 function enterAdmin() {
   appMode = 'admin';
   stopSlideshow();
-  document.getElementById('adminBar').style.display = 'flex';
-  document.getElementById('topNav').classList.remove('hide');
-  document.getElementById('btnA').classList.add('on');
-  document.getElementById('btnS').classList.remove('on');
+  const adminBar = document.getElementById('adminBar');
+  const topNav   = document.getElementById('topNav');
+  const btnA     = document.getElementById('btnA');
+  const btnS     = document.getElementById('btnS');
+  if (adminBar) adminBar.style.display = 'flex';
+  if (topNav)   topNav.classList.remove('hide');
+  if (btnA)     btnA.classList.add('on');
+  if (btnS)     btnS.classList.remove('on');
   renderSlideshow();
 }
 
@@ -42,12 +49,17 @@ function enterAdmin() {
  */
 function enterScreen() {
   appMode = 'screen';
-  document.getElementById('loginScreen').classList.add('gone');
-  setTimeout(() => document.getElementById('loginScreen').style.display = 'none', 420);
-  document.getElementById('adminBar').style.display = 'none';
-  document.getElementById('topNav').classList.add('hide');
-  closeDrawer();
-  renderSlideshow();
+  // Ces éléments n'existent que dans index.html, pas dans totem.html → vérification null
+  const loginScreen = document.getElementById('loginScreen');
+  const adminBar    = document.getElementById('adminBar');
+  const topNav      = document.getElementById('topNav');
+  if (loginScreen) {
+    loginScreen.classList.add('gone');
+    setTimeout(() => { loginScreen.style.display = 'none'; }, 420);
+  }
+  if (adminBar) adminBar.style.display = 'none';
+  if (topNav)   topNav.classList.add('hide');
+  if (typeof closeDrawer === 'function') closeDrawer();
   startSlideshow();
 }
 
@@ -68,9 +80,12 @@ function setMode(m) {
 function logout() {
   appMode = null;
   stopSlideshow();
-  document.getElementById('adminBar').style.display = 'none';
-  document.getElementById('loginScreen').style.display = 'flex';
-  document.getElementById('loginScreen').classList.remove('gone');
-  document.getElementById('pwdInput').value = '';
-  document.getElementById('lerr').style.display = 'none';
+  const adminBar    = document.getElementById('adminBar');
+  const loginScreen = document.getElementById('loginScreen');
+  const pwdInput    = document.getElementById('pwdInput');
+  const lerr        = document.getElementById('lerr');
+  if (adminBar)    adminBar.style.display = 'none';
+  if (loginScreen) { loginScreen.style.display = 'flex'; loginScreen.classList.remove('gone'); }
+  if (pwdInput)    pwdInput.value = '';
+  if (lerr)        lerr.style.display = 'none';
 }
