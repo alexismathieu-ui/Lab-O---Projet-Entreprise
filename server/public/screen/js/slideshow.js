@@ -313,7 +313,8 @@ function stopSlideshow() {
   clearInterval(slideTimer); slideTimer = null;
   ribbonAnims.forEach(a => cancelAnimationFrame(a));
   ribbonAnims = [];
-  document.getElementById('pbarFill').style.width = '0%';
+  const fill = document.getElementById('pbarFill');
+  if (fill) fill.style.width = '0%';
 }
 
 /* ────────────────────────────────────────

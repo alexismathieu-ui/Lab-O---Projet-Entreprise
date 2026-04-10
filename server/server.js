@@ -19,6 +19,9 @@ app.use('/screen', express.static(path.join(__dirname, 'public/screen')));
 app.use('/mobile', express.static(path.join(__dirname, 'public/mobile')));
 app.get('/', (req, res) => res.redirect('/screen'));
 app.get('/admin', (req, res) => res.redirect('/screen'));
+// URL à mettre sur la télé/totem — lance directement le mode écran sans login
+app.get('/tv', (req, res) => res.redirect('/screen?tv'));
+app.get('/reset', (req, res) => res.sendFile(require('path').join(__dirname, 'public/screen/reset.html')));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/pulse";
@@ -408,6 +411,24 @@ app.delete("/api/alert", async (req, res) => {
   } catch (err) { res.status(500).json({ message: "Erreur serveur." }); }
 });
 
+// RESET COMPLET BASE DE DONNÉES (à utiliser une seule fois pour repartir proprement)
+app.post("/api/admin/reset-db", async (req, res) => {
+  const { secret } = req.body;
+  if (secret !== "pulse-reset-2026") return res.status(403).json({ message: "Accès refusé." });
+  try {
+    await Post.deleteMany({});
+    await Annonce.deleteMany({});
+    await Media.deleteMany({});
+    await Coworker.deleteMany({});
+    await Question.deleteMany({});
+    await Alert.deleteMany({});
+    console.log("🗑️  Base de données réinitialisée complètement.");
+    res.json({ message: "Base de données réinitialisée avec succès." });
+  } catch (err) {
+    res.status(500).json({ message: "Erreur lors du reset." });
+  }
+});
+
 // LOOP STATUS 
 
 app.get("/api/loop/status", async (req, res) => {
@@ -446,6 +467,19 @@ app.get('/api/weather', async (req, res) => {
 
 io.on("connection", (socket) => {
   console.log("🔌 Client connecté:", socket.id);
+  socket.on("disconnect", () => console.log("🔌 Client déconnecté:", socket.id));
+
+  // Quand l'admin modifie quelque chose dans le drawer → notifier tous les totems
+  socket.on("drawer-updated", (data) => {
+    socket.broadcast.emit("drawer-updated", data);
+  });
+
+
+  // L'admin change la durée des diapos → on broadcast à tous (totem inclus)
+  socket.on("slide-duration-updated", (data) => {
+    socket.broadcast.emit("slide-duration-updated", data);
+  });
+
   socket.on("disconnect", () => console.log("🔌 Client déconnecté:", socket.id));
 });
 

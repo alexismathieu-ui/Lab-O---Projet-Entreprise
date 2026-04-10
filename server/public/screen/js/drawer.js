@@ -43,10 +43,12 @@ function openDrawer() {
  * Ferme le drawer et l'overlay.
  */
 function closeDrawer() {
-  document.getElementById('drawer').classList.remove('open');
-  document.getElementById('drwOv').classList.remove('open');
-  const np = document.getElementById('notifPanel');
-  if (np) np.classList.remove('open');
+  const drawer = document.getElementById('drawer');
+  const drwOv  = document.getElementById('drwOv');
+  const np     = document.getElementById('notifPanel');
+  if (drawer) drawer.classList.remove('open');
+  if (drwOv)  drwOv.classList.remove('open');
+  if (np)     np.classList.remove('open');
 }
 
 /**
@@ -84,7 +86,8 @@ function renderDrawerSection(section) {
     { key: 'calendrier',  label: 'Gérer le calendrier' },
     { key: 'news',        label: 'Gérer les nouveautés' },
     { key: 'partenaires', label: 'Gérer les partenaires' },
-    { key: 'questions',   label: 'Questions du jour' }
+    { key: 'questions',   label: 'Questions du jour' },
+    { key: 'parametres',  label: '⚙ Paramètres' }
   ];
 
   inner.innerHTML = `
@@ -106,7 +109,7 @@ function renderDrawerSection(section) {
       <div class="drw-list-col">
         <div class="drw-list-toolbar">
           <button class="drw-back-btn" onclick="closeDrawer()" title="Retour">‹</button>
-          ${section !== 'chat' && section !== 'questions'
+          ${section !== 'chat' && section !== 'questions' && section !== 'parametres'
             ? `<button class="btn btn-sm btn-ghost" style="border:1.5px solid var(--red);color:var(--red);display:flex;align-items:center;gap:4px"
                  onclick="openCreateForm('${section}')">
                  <span style="font-size:16px;font-weight:700">+</span> Créer
@@ -272,6 +275,8 @@ function renderSectionList(section) {
 
   } else if (section === 'questions') {
     renderQuestionsList(list);
+  } else if (section === 'parametres') {
+    renderParametres(list);
   }
 }
 
@@ -314,6 +319,108 @@ function emptyMsg(msg) {
 ──────────────────────────────────────── */
 
 /**
+ * renderParametres(container)
+ * Affiche les paramètres du diaporama dans le drawer admin.
+ */
+function renderParametres(container) {
+  const curSec = Math.round(SLIDE_MS / 1000);
+  const presets = [5, 10, 15, 20, 30, 45, 60];
+
+  // Calcule le pourcentage pour le remplissage initial du slider
+  const pct = Math.round(((curSec - 3) / (120 - 3)) * 100);
+
+  container.innerHTML = `
+    <div class="param-section">
+
+      <div class="param-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="17" height="17" style="flex-shrink:0">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
+        </svg>
+        Durée des diapositives
+      </div>
+
+      <p class="param-hint">
+        Temps d'affichage de chaque diapo : startups, annonces, partenaires, calendrier&hellip;
+      </p>
+
+      <!-- Valeur numérique -->
+      <div class="param-display">
+        <span class="param-val" id="paramVal">${curSec}</span>
+        <span class="param-unit">secondes</span>
+      </div>
+
+      <!-- Slider — la couleur de remplissage est mise à jour via JS inline -->
+      <input
+        type="range" id="paramSlider" class="param-slider"
+        min="3" max="120" step="1" value="${curSec}"
+        style="--pct:${pct}%"
+        oninput="paramSliderInput(this)"
+      />
+      <div class="param-range-labels"><span>3 sec</span><span>2 min</span></div>
+
+      <!-- Presets -->
+      <div class="param-presets">
+        ${presets.map(s => `
+          <button class="param-preset${s === curSec ? ' active' : ''}" data-val="${s}"
+            onclick="paramPresetClick(this, ${s})">${s}s</button>`).join('')}
+      </div>
+
+      <!-- Bouton Appliquer -->
+      <button class="param-apply" onclick="applySliderDuration()">✓ Appliquer</button>
+
+      <div class="param-note" id="paramNote"></div>
+    </div>`;
+}
+
+/**
+ * paramSliderInput(el)
+ * Met à jour l'affichage numérique et la couleur de la barre quand on glisse.
+ */
+function paramSliderInput(el) {
+  const val = parseInt(el.value, 10);
+  const pct = Math.round(((val - 3) / (120 - 3)) * 100);
+  el.style.setProperty('--pct', pct + '%');
+  document.getElementById('paramVal').textContent = val;
+  // Désactiver tous les presets, activer celui qui correspond
+  document.querySelectorAll('.param-preset').forEach(b =>
+    b.classList.toggle('active', parseInt(b.dataset.val, 10) === val)
+  );
+}
+
+/**
+ * paramPresetClick(btn, sec)
+ * Sélectionne un preset et met à jour slider + valeur.
+ */
+function paramPresetClick(btn, sec) {
+  const slider = document.getElementById('paramSlider');
+  slider.value = sec;
+  paramSliderInput(slider);
+}
+
+/**
+ * applySliderDuration()
+ * Applique la nouvelle durée, met à jour l'UI et notifie via socket.
+ */
+function applySliderDuration() {
+  const sec = parseInt(document.getElementById('paramSlider').value, 10);
+  setSlideDuration(sec * 1000);
+
+  // Notifier totem.html via socket si disponible
+  if (typeof socket !== 'undefined') {
+    socket.emit('slide-duration-updated', { ms: sec * 1000 });
+  }
+
+  const note = document.getElementById('paramNote');
+  if (note) {
+    note.textContent = '✓ ' + sec + ' secondes appliquées — diaporama redémarré.';
+    note.style.display = 'block';
+    clearTimeout(note._t);
+    note._t = setTimeout(() => { note.style.display = 'none'; }, 3000);
+  }
+}
+
+/**
  * renderQuestionsList(container)
  * Affiche l'éditeur des questions mensuelles.
  */
@@ -334,14 +441,14 @@ function renderQuestionsList(container) {
           <div class="q-day-row">
             <span class="q-day-lbl">J${qi+1}</span>
             <input type="text" value="${h(q)}"
-              onchange="D.questions[${m}][${qi}]=this.value;saveData()"/>
+              onclick="D.questions[${m}].splice(${qi},1);saveData();renderSectionList('questions');if(typeof socket!=='undefined')socket.emit('drawer-updated')"
             <button class="btn btn-danger btn-sm"
               onclick="D.questions[${m}].splice(${qi},1);saveData();renderSectionList('questions')">✕</button>
           </div>`).join('')}
       </div>
       <button class="btn btn-ghost btn-sm" style="margin-top:4px;font-size:11px"
-        onclick="if(!D.questions[${m}])D.questions[${m}]=[];D.questions[${m}].push('Nouvelle question');saveData();renderSectionList('questions')">
-        + Question</button>`;
+        onclick="if(!D.questions[${m}])D.questions[${m}]=[];D.questions[${m}].push('Nouvelle question');saveData();renderSectionList('questions');if(typeof socket!=='undefined')socket.emit('drawer-updated')"
+        >+ Question</button>`;
     container.appendChild(block);
   }
 }
@@ -730,6 +837,8 @@ function submitForm() {
     renderTicker();
   }
   if (_editSection === 'news') renderTicker();
+  // Notifier le totem immédiatement
+  if (typeof socket !== 'undefined') socket.emit('drawer-updated', D);
 }
 
 /* ────────────────────────────────────────
@@ -755,6 +864,8 @@ function deleteItem(section, idx) {
   if (['posts','annonces','calendrier','partenaires'].includes(section)) { renderSlideshow(); renderTicker(); }
   if (section === 'news' || section === 'news_pending') renderTicker();
   if (section === 'chat' || section === 'chat_vote') { renderVotes(); updateNotifBadge(); }
+  // Notifier le totem immédiatement
+  if (typeof socket !== 'undefined') socket.emit('drawer-updated', D);
 }
 
 /* ────────────────────────────────────────

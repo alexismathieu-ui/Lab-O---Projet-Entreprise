@@ -8,11 +8,31 @@
 /** Mot de passe du mode admin */
 const ADMIN_PWD = "admin123";
 
-/** Durée d'affichage de chaque diapositive (ms) */
-const SLIDE_MS = 15000;
+/** Durée d'affichage de chaque diapositive (ms) — modifiable via ⚙ Paramètres */
+let SLIDE_MS = (() => {
+  const saved = parseInt(localStorage.getItem('labovca_slide_ms'), 10);
+  return (!isNaN(saved) && saved >= 3000 && saved <= 120000) ? saved : 15000;
+})();
 
-/** Clé localStorage */
-const LS_KEY = "labovca_data_v6";
+/**
+ * setSlideDuration(ms)
+ * Met à jour SLIDE_MS, le persiste dans localStorage,
+ * et redémarre le diaporama si on est en mode écran.
+ */
+function setSlideDuration(ms) {
+  ms = Math.max(3000, Math.min(120000, parseInt(ms, 10) || 15000));
+  SLIDE_MS = ms;
+  localStorage.setItem('labovca_slide_ms', String(ms));
+  // Redémarre le diaporama si actif
+  if (typeof appMode !== 'undefined' && appMode === 'screen') {
+    if (typeof stopSlideshow  === 'function') stopSlideshow();
+    if (typeof startSlideshow === 'function') startSlideshow();
+  }
+}
+
+/** Clé IndexedDB */
+/** Clé IndexedDB — incrémenter si on veut forcer un reset client */
+const LS_KEY = "labovca_data_v7";
 
 /** Coordonnées météo (Orléans, France) */
 const WEATHER_LAT = 47.9029;

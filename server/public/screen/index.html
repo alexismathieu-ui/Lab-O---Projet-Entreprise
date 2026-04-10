@@ -233,7 +233,7 @@
 <script src="js/drawer.js"></script>
 
 <script>
-  
+
   /* ── Initialisation au chargement ── */
   async function initApp() {
     D = await loadData();
@@ -241,22 +241,47 @@
     updateQuestion();
     renderVotes();
     renderSlideshow();
-    // Re-sync toutes les 30 secondes pour rattraper ce qui aurait été manqué
+    // Re-sync toutes les 30 secondes
     setInterval(syncFromAPI, 30000);
+
+    // Mode TV : si l'URL contient ?tv, on passe directement en mode écran
+    // sans login. Utiliser http://serveur/screen?tv sur la télé.
+    if (new URLSearchParams(window.location.search).has('tv')) {
+      document.getElementById('loginScreen').style.display = 'none';
+      enterScreen();
+    }
   }
   initApp();
 </script>
 <script src="/socket.io/socket.io.js"></script>
 <script>
   const socket = io();
-  socket.on('post-updated', syncFromAPI);
-  socket.on('post-deleted', syncFromAPI);
-  socket.on('wall-cleared', syncFromAPI);
-  socket.on('media-updated', syncFromAPI);
-  socket.on('question-updated', syncFromAPI);
-  socket.on('alert', syncFromAPI);
-  socket.on('alert-cleared', syncFromAPI);
-  socket.on('new-post', syncFromAPI);
+  socket.on('post-updated',            syncFromAPI);
+  socket.on('post-deleted',            syncFromAPI);
+  socket.on('wall-cleared',            syncFromAPI);
+  socket.on('media-updated',           syncFromAPI);
+  socket.on('question-updated',        () => { syncFromAPI(); if (typeof updateQuestion === 'function') updateQuestion(); });
+  socket.on('alert',                   syncFromAPI);
+  socket.on('alert-cleared',           syncFromAPI);
+  socket.on('new-post',                syncFromAPI);
+  socket.on('drawer-updated', async (remoteD) => {
+      if (remoteD && typeof remoteD === 'object') {
+        // Fusionner les données reçues dans D
+          Object.assign(D, remoteD);
+          await idbSave(LS_KEY, D);
+      } else {
+          D = await loadData();
+      }
+      if (typeof updateQuestion   === 'function') updateQuestion();
+      if (typeof renderVotes      === 'function') renderVotes();
+      if (typeof renderSlideshow  === 'function') renderSlideshow();
+      if (typeof renderTicker     === 'function') renderTicker();
+      if (typeof updateNotifBadge === 'function') updateNotifBadge();
+    });
+  // Durée diapo changée sur un autre onglet/écran
+  socket.on('slide-duration-updated',  (data) => {
+    if (data && data.ms) setSlideDuration(data.ms);
+  });
 </script>
 
 </body>

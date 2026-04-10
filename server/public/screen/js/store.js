@@ -46,15 +46,13 @@ async function loadData() {
 
 async function syncFromAPI() {
   try {
-    const [startups, annonces, question, alert, ticker] = await Promise.all([
+    const [startups, question, alert] = await Promise.all([
       fetch('/api/coworkers').then(r => r.json()),
-      fetch('/api/annonces?status=approved').then(r => r.json()),
       fetch('/api/question').then(r => r.json()),
       fetch('/api/alert').then(r => r.json()),
-      fetch('/api/posts?status=approved').then(r => r.json()),
     ]);
     // Mappe les coworkers (startups) au format attendu par buildStartupSlide
-    D.startups = (startups || []).map(c => ({
+  const newStartups = (startups || []).map(c => ({
       name: c.company,
       floor: c.floor,
       logo: c.logo || c.avatar || '',
@@ -63,11 +61,23 @@ async function syncFromAPI() {
       contact: c.contact,
       website: c.website,
     }));
-    D.announcements = (annonces || []).map(a => ({
-      name: a.title,
-      description: a.description,
-    }));
-if (question && question.text) D.questions._active = question.text;
+    // Mémoriser l'index courant avant de changer les données
+  const prevLen = getSlides().length;
+
+  D.startups = newStartups;
+  // D.announcements est géré exclusivement en local (IDB) car contient des photos base64.
+  // On ne l'écrase JAMAIS depuis l'API.
+
+    // Si le nombre de slides a changé, ajuster curIdx pour rester valide
+  const newLen = getSlides().length;
+    if (newLen > 0 && curIdx >= newLen) {
+      curIdx = 0;
+    } else if (prevLen === 0 && newLen > 0) {
+      // Nouvelles slides disponibles pour la première fois → démarrer le diaporama
+      curIdx = 0;
+      if (appMode === 'screen' && !slideTimer) startSlideshow();
+    }
+  if (question && question.text) D.questions._active = question.text;
     // Si le mois courant a des questions dans le drawer, on ignore _active
     const moisCourant = new Date().getMonth() + 1;
     if (D.questions && D.questions[moisCourant] && D.questions[moisCourant].length) {
@@ -103,7 +113,8 @@ if (question && question.text) D.questions._active = question.text;
 
     saveData();
     renderSlideshow();
-    if (typeof updateQuestion === 'function') updateQuestion();
+    if (typeof updateQuestion   === 'function') updateQuestion();
+    if (typeof renderVotes      === 'function') renderVotes();
     if (typeof updateNotifBadge === 'function') updateNotifBadge();
   } catch(e) { console.warn('Sync API échouée:', e); }
 }
@@ -119,6 +130,20 @@ let slideTimer = null;         /* setInterval du diaporama */
 let drawerSection = 'posts';   /* section active dans le drawer admin */
 let draft      = null;         /* copie de travail pour l'édition */
 let ribbonAnims = [];          /* handles requestAnimationFrame du ruban */
+
+/**
+ * clearDailyData()
+ * Vide les votes et réponses en attente au changement de jour.
+ * Appelée par sidebar.js quand la date change (passage à minuit).
+ */
+function clearDailyData() {
+  D.votes          = [];
+  D.pendingAnswers = [];
+  saveData();
+  if (typeof renderVotes      === 'function') renderVotes();
+  if (typeof updateNotifBadge === 'function') updateNotifBadge();
+  console.log('🌅 Nouveau jour : votes et réponses du jour réinitialisés.');
+}
 
 /**
  * h(s)
@@ -226,8 +251,10 @@ function countPendingNotifs() {
  * @returns {string}
  */
 function fmtDate(isoStr) {
+  if (!isoStr) return '';
   try {
     const d = new Date(isoStr);
+    if (isNaN(d.getTime())) return '';
     const dd = String(d.getDate()).padStart(2,'0');
     const mm = String(d.getMonth()+1).padStart(2,'0');
     const yy = d.getFullYear();
