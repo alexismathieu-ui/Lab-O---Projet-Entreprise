@@ -53,13 +53,16 @@ async function syncFromAPI() {
     ]);
     // Mappe les coworkers (startups) au format attendu par buildStartupSlide
   const newStartups = (startups || []).map(c => ({
-      name: c.company,
-      floor: c.floor,
-      logo: c.logo || c.avatar || '',
-      ceo: c.name,
-      description: c.bio,
+      _id:     c._id,
+      name:    c.company,
+      floor:   c.floor,
+      photo:   c.logo || c.avatar || '',
+      ceo:     c.name,
+      desc:    c.bio,
+      poste:   c.name,
       contact: c.contact,
-      website: c.website,
+      web:     c.website,
+      qrUrl:   c.qrUrl || '',
     }));
     // Mémoriser l'index courant avant de changer les données
   const prevLen = getSlides().length;

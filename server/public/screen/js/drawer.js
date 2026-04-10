@@ -747,8 +747,9 @@ async function readFormPhoto(file) {
 /**
  * submitForm()
  * Lit tous les champs du formulaire et applique la création ou la modification.
+ * Async pour permettre la sauvegarde MongoDB des startups (posts).
  */
-function submitForm() {
+async function submitForm() {
   const body = document.getElementById('drwFormBody');
   const get  = (name) => {
     const el = body.querySelector(`[name="${name}"]`);
@@ -756,15 +757,63 @@ function submitForm() {
   };
 
   if (_editSection === 'posts') {
+    const photo = _formPhoto || (_editIdx !== null ? D.startups[_editIdx]?.photo : null);
     const obj = {
-      name: get('name'), floor: get('floor'), desc: get('desc'),
-      poste: get('poste'), contact: get('contact'), web: get('web'),
-      qrUrl: get('qrUrl'),
-      photo: _formPhoto || (_editIdx !== null ? D.startups[_editIdx]?.photo : null),
+      name:    get('name'),    floor:   get('floor'),   desc:    get('desc'),
+      poste:   get('poste'),   contact: get('contact'), web:     get('web'),
+      qrUrl:   get('qrUrl'),   photo,
       updatedAt: new Date().toISOString()
     };
-    if (_editIdx !== null) D.startups[_editIdx] = obj;
-    else D.startups.push(obj);
+
+    /* ── Persistance MongoDB : indispensable pour survivre à syncFromAPI() ── */
+    const apiBody = {
+      company: obj.name   || 'Startup',
+      name:    obj.poste  || obj.name || 'Admin',
+      floor:   obj.floor  || '',
+      bio:     obj.desc   || '',
+      contact: obj.contact|| '',
+      website: obj.web    || '',
+      logo:    photo      || '',
+      qrUrl:   obj.qrUrl  || '',
+    };
+    try {
+      if (_editIdx !== null) {
+        /* Modification d'un startup existant */
+        const existingId = D.startups[_editIdx]?._id;
+        if (existingId) {
+          /* Déjà dans MongoDB → PATCH */
+          const r = await fetch(`/api/coworkers/${existingId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(apiBody)
+          });
+          if (r.ok) { const saved = await r.json(); obj._id = saved._id; }
+        } else {
+          /* Pas encore dans MongoDB (ajouté avant ce correctif) → POST */
+          const r = await fetch('/api/coworkers', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(apiBody)
+          });
+          if (r.ok) { const saved = await r.json(); obj._id = saved._id; }
+        }
+        D.startups[_editIdx] = obj;
+      } else {
+        /* Création d'un nouveau startup */
+        const r = await fetch('/api/coworkers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(apiBody)
+        });
+        if (r.ok) { const saved = await r.json(); obj._id = saved._id; }
+        D.startups.push(obj);
+      }
+    } catch (e) {
+      console.warn('Erreur sauvegarde MongoDB startup :', e);
+      /* On continue quand même : sauvegarde locale assurée */
+      if (_editIdx !== null) D.startups[_editIdx] = obj;
+      else D.startups.push(obj);
+    }
 
   } else if (_editSection === 'annonces') {
     /* Annonce directe, pas de vérification admin */
@@ -848,10 +897,21 @@ function submitForm() {
 /**
  * deleteItem(section, idx)
  * Supprime un item après confirmation.
+ * Async pour permettre la suppression MongoDB des startups (posts).
  */
-function deleteItem(section, idx) {
+async function deleteItem(section, idx) {
   if (!confirm('Supprimer cet élément ?')) return;
-  if (section === 'posts')       { D.startups.splice(idx, 1); if (curIdx >= D.startups.length) curIdx = 0; }
+  if (section === 'posts') {
+    /* Suppression MongoDB avant de retirer du tableau local */
+    const existingId = D.startups[idx]?._id;
+    if (existingId) {
+      try {
+        await fetch(`/api/coworkers/${existingId}`, { method: 'DELETE' });
+      } catch (e) { console.warn('Erreur suppression MongoDB startup :', e); }
+    }
+    D.startups.splice(idx, 1);
+    if (curIdx >= D.startups.length) curIdx = 0;
+  }
   if (section === 'annonces')    { (D.announcements || []).splice(idx, 1); }
   if (section === 'chat')        { (D.pendingAnswers || []).splice(idx, 1); }
   if (section === 'chat_vote')   { (D.votes || []).splice(idx, 1); }
