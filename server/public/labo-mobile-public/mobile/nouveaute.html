@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lab'O — Ajouter une nouveauté</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Yanone+Kaffeesatz:wght@300;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --color-labo-white: #f8f2eb;
+        --color-labo-red: #e53530;
+        --color-labo-black: #050707;
+        --color-placeholder: rgba(30, 30, 30, 0.5);
+        --color-page-bg: #ddd5c8;
+        --font-primary: "Yanone Kaffeesatz", sans-serif;
+        --fw-semibold: 600;
+        --fw-light: 300;
+        --fs-main: 28px;
+        --fs-btn: 24px;
+        --fs-required: 10px;
+        --lh-main: 1.4;
+        --ls-main: -0.56px;
+        --ls-btn: -0.48px;
+        --shadow-btn: 2px 4px 4px 0px rgba(0, 0, 0, 0.25);
+        --border-red: 2px solid var(--color-labo-red);
+        --phone-w: 402px;
+        --phone-h: 872px;
+      }
+
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body { width: 100%; min-height: 100%; }
+
+      body {
+        background-color: var(--color-page-bg);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-primary);
+      }
+
+      .phone-scene {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+      }
+
+      .phone {
+        position: relative;
+        width: var(--phone-w);
+        height: var(--phone-h);
+        background-color: var(--color-labo-white);
+        border-radius: 50px;
+        box-shadow:
+          0 0 0 10px #1a1a1a,
+          0 0 0 12px #3a3a3a,
+          0 24px 80px rgba(0, 0, 0, 0.45);
+        overflow: hidden;
+        flex-shrink: 0;
+      }
+
+      /* Logo */
+      .logo {
+        position: absolute;
+        top: 126px;
+        left: 144px;
+        width: 114px;
+        height: 114px;
+      }
+
+      /* Titre */
+      .section-title {
+        position: absolute;
+        top: 267px;
+        left: 6px;
+        width: 390px;
+        font-family: var(--font-primary);
+        font-weight: var(--fw-semibold);
+        font-size: var(--fs-main);
+        color: var(--color-labo-black);
+        letter-spacing: var(--ls-main);
+        line-height: var(--lh-main);
+      }
+      .section-title__underline {
+        position: absolute;
+        top: 295px;
+        left: 12px;
+        width: 330px;
+        height: 2px;
+        background-color: var(--color-labo-black);
+      }
+
+      /* Sous-titre explicatif */
+      .section-sub {
+        position: absolute;
+        top: 316px;
+        left: 54px;
+        width: 294px;
+        font-family: var(--font-primary);
+        font-weight: var(--fw-light);
+        font-size: 18px;
+        color: var(--color-placeholder);
+        letter-spacing: var(--ls-main);
+        line-height: 1.4;
+      }
+
+      /* Champ nom */
+      .field {
+        position: absolute;
+        left: 54px;
+        width: 294px;
+      }
+      .field__input,
+      .field__textarea {
+        display: block;
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        border: var(--border-red);
+        border-radius: 0;
+        outline: none;
+        font-family: var(--font-primary);
+        font-weight: var(--fw-semibold);
+        font-size: var(--fs-main);
+        color: var(--color-labo-black);
+        letter-spacing: var(--ls-main);
+        line-height: var(--lh-main);
+        padding: 0 9px;
+        resize: none;
+        -webkit-appearance: none;
+        appearance: none;
+      }
+      .field__textarea { padding-top: 11px; vertical-align: top; }
+      .field__input::placeholder,
+      .field__textarea::placeholder {
+        color: var(--color-placeholder);
+        opacity: 1;
+      }
+
+      .required {
+        position: absolute;
+        left: 66px;
+        font-family: var(--font-primary);
+        font-weight: var(--fw-light);
+        font-size: var(--fs-required);
+        color: var(--color-labo-red);
+        letter-spacing: -0.2px;
+        white-space: nowrap;
+      }
+
+      /* Bouton */
+      .submit-btn {
+        position: absolute;
+        top: 760px;
+        left: 112px;
+        width: 177px;
+        height: 50px;
+        background-color: var(--color-labo-white);
+        border: var(--border-red);
+        border-radius: 10px;
+        box-shadow: var(--shadow-btn);
+        font-family: var(--font-primary);
+        font-weight: var(--fw-semibold);
+        font-size: var(--fs-btn);
+        color: var(--color-labo-black);
+        letter-spacing: var(--ls-btn);
+        text-align: center;
+        cursor: pointer;
+        -webkit-appearance: none;
+        appearance: none;
+        transition: opacity 0.12s ease, transform 0.12s ease;
+      }
+      .submit-btn:hover { opacity: 0.88; }
+      .submit-btn:active { transform: scale(0.97); opacity: 0.8; }
+
+      /* Succès */
+      #successMsg {
+        display: none;
+        position: absolute;
+        top: 720px;
+        left: 30px;
+        width: 342px;
+        background: #e8f5ee;
+        border: 2px solid #16a34a;
+        border-radius: 10px;
+        padding: 12px 16px;
+        font-family: var(--font-primary);
+        font-weight: var(--fw-semibold);
+        font-size: 20px;
+        color: #16a34a;
+        text-align: center;
+      }
+
+      /* Retour */
+      .back-link {
+        position: absolute;
+        bottom: 40px;
+        left: 0;
+        width: 100%;
+        text-align: center;
+        font-family: var(--font-primary);
+        font-weight: 600;
+        font-size: 20px;
+        color: var(--color-labo-red);
+        text-decoration: none;
+        letter-spacing: -0.4px;
+      }
+
+      /* Home indicator */
+      .home-indicator {
+        position: absolute;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 161px;
+        height: 6px;
+        background-color: var(--color-labo-black);
+        border-radius: 100px;
+      }
+
+      /* Mobile responsive */
+      @media (max-width: 768px) {
+        body { background-color: var(--color-labo-white); align-items: flex-start; }
+        .phone-scene { padding: 0; width: 100%; min-height: 100vh; align-items: flex-start; }
+        .phone {
+          --scale: 1;
+          width: 100vw;
+          height: calc(var(--phone-h) * var(--scale));
+          border-radius: 0;
+          box-shadow: none;
+          overflow-y: auto;
+          overflow-x: hidden;
+        }
+        .logo {
+          top: calc(126px * var(--scale));
+          left: 50%;
+          transform: translateX(-50%);
+          width: calc(114px * var(--scale));
+          height: calc(114px * var(--scale));
+        }
+        .section-title { top: calc(267px * var(--scale)); left: calc(6px * var(--scale)); width: calc(390px * var(--scale)); font-size: calc(var(--fs-main) * var(--scale)); }
+        .section-title__underline { top: calc(295px * var(--scale)); left: calc(12px * var(--scale)); width: calc(330px * var(--scale)); }
+        .section-sub { top: calc(316px * var(--scale)); left: calc(54px * var(--scale)); width: calc(294px * var(--scale)); font-size: calc(18px * var(--scale)); }
+        .field { left: calc(54px * var(--scale)); width: calc(294px * var(--scale)); }
+        .field__input, .field__textarea { font-size: calc(var(--fs-main) * var(--scale)); padding: 0 calc(9px * var(--scale)); }
+        .field__textarea { padding-top: calc(11px * var(--scale)); }
+        .required { left: calc(66px * var(--scale)); font-size: calc(var(--fs-required) * var(--scale)); }
+        .submit-btn { top: calc(760px * var(--scale)); left: calc(112px * var(--scale)); width: calc(177px * var(--scale)); height: calc(50px * var(--scale)); font-size: calc(var(--fs-btn) * var(--scale)); }
+        #successMsg { top: calc(720px * var(--scale)); left: calc(30px * var(--scale)); width: calc(342px * var(--scale)); }
+        .home-indicator { width: calc(161px * var(--scale)); height: calc(6px * var(--scale)); }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="phone-scene">
+      <main class="phone" role="main" aria-label="Ajouter une nouveauté">
+
+        <!-- Logo SVG inline -->
+        <div class="logo">
+          <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" width="114" height="114">
+            <circle cx="60" cy="60" r="60" fill="#e53530"/>
+            <text x="60" y="52" text-anchor="middle" font-family="Yanone Kaffeesatz,sans-serif"
+                  font-weight="700" font-size="28" fill="white" letter-spacing="1">LAB'O</text>
+            <text x="60" y="78" text-anchor="middle" font-family="Yanone Kaffeesatz,sans-serif"
+                  font-weight="400" font-size="13" fill="rgba(255,255,255,0.82)" letter-spacing="2">VILLAGE BY CA</text>
+          </svg>
+        </div>
+
+        <!-- Titre -->
+        <h2 class="section-title">Ajouter une nouveauté</h2>
+        <div class="section-title__underline" aria-hidden="true"></div>
+
+        <!-- Sous-titre -->
+        <p class="section-sub">Votre message défilera dans le bandeau en bas de l'écran.</p>
+
+        <!-- Champ : Prénom / Pseudo -->
+        <div class="field" style="top:366px;height:48px">
+          <input class="field__input" type="text" id="f-name" placeholder="Prénom/Pseudo/Boîte..."/>
+        </div>
+        <span class="required" style="top:422px">*Facultatif</span>
+
+        <!-- Champ : Message ticker -->
+        <div class="field" style="top:450px;height:200px">
+          <textarea class="field__textarea" id="f-text" placeholder="Votre nouveauté..." maxlength="120"></textarea>
+        </div>
+        <span class="required" style="top:657px">*Requis — max 120 caractères</span>
+
+        <!-- Message succès -->
+        <div id="successMsg">✓ Nouveauté envoyée, en attente de validation !</div>
+
+        <!-- Bouton Envoyer -->
+        <button class="submit-btn" type="button" onclick="envoyerNouveaute()">Envoyer</button>
+
+        <!-- Retour -->
+        <a href="index.html" class="back-link">← Retour</a>
+
+        <div class="home-indicator" aria-hidden="true"></div>
+      </main>
+    </div>
+
+    <script>
+      (function () {
+        var DESIGN_W = 402;
+        var phone = document.querySelector(".phone");
+        function applyScale() {
+          if (window.innerWidth > 768) { phone.style.removeProperty("--scale"); return; }
+          phone.style.setProperty("--scale", (window.innerWidth / DESIGN_W).toFixed(6));
+        }
+        applyScale();
+        window.addEventListener("resize", applyScale);
+      })();
+    </script>
+
+    <script>
+      async function envoyerNouveaute() {
+        const text = document.getElementById('f-text').value.trim();
+        const name = document.getElementById('f-name').value.trim() || 'Anonyme';
+
+        if (!text) { alert('Écris ta nouveauté !'); return; }
+
+        try {
+          const res = await fetch('/api/posts', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ text, author: name, category: 'Info' })
+          });
+          const data = await res.json();
+
+          if (data._id) {
+            document.getElementById('successMsg').style.display = 'block';
+            document.getElementById('f-text').value = '';
+            document.getElementById('f-name').value = '';
+          } else {
+            alert('Erreur : ' + (data.message || 'inconnue'));
+          }
+        } catch(e) {
+          alert('Erreur serveur, réessaie.');
+        }
+      }
+    </script>
+  </body>
+</html>
