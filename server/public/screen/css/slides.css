@@ -451,38 +451,40 @@
   max-width: 200px;
 }
 
-/* QR dans le footer — visible seulement si URL fournie */
-.card-qr-footer {
+/* QR code sous la description — disposition horizontale */
+.card-qr-inline {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 6px;
+  gap: 12px;
+  margin-top: 6px;
   flex-shrink: 0;
 }
-.qrlbl-footer {
-  font-family: var(--fd);
-  font-size: 16px;
-  font-weight: var(--fw-bold);
-  line-height: 1.3;
-  color: var(--dark);
-  text-align: center;
-}
-/* Boîte QR code noire */
-.qrbox {
-  width: 74px;
-  height: 74px;
+/* Boîte QR code noire (version inline) */
+.qrbox-inline {
+  width: 94px;
+  height: 94px;
   background: var(--dark);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   overflow: hidden;
+  border-radius: 4px;
 }
-.qrbox img {
+.qrbox-inline img {
   width: 100%;
   height: 100%;
   object-fit: contain;
   display: block;
+}
+.qrlbl-inline {
+  font-family: var(--fd);
+  font-size: 25px;
+  font-weight: var(--fw-bold);
+  line-height: 1.35;
+  color: var(--dark);
+  white-space: nowrap;
 }
 
 /* ════════════════════════════════════════
