@@ -41,7 +41,7 @@ cd Lab-O---Projet-Entreprise
 
 # Lancer l'infrastructure
 docker compose up
-
+```
 3️⃣ Accès
 Une fois le déploiement terminé, l'application est disponible sur :
 👉 http://localhost:PORT (Remplacez PORT par le port configuré, ex: 3000)
