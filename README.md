@@ -1,4 +1,4 @@
-# 🧪 Lab-O — Projet Entreprise
+# 🧪 Lab-O — Projet Entreprise : 
 
 [![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 [![Status](https://img.shields.io/badge/Status-En_D%C3%A9veloppement-orange?style=for-the-badge)](https://github.com/alexismathieu-ui/Lab-O---Projet-Entreprise)
@@ -7,12 +7,12 @@
 
 ---
 
-## ✨ Fonctionnalités
+## ✨ Fonctionnalités : 
 * **[Fonctionnalité 1]** : Description rapide de l'atout majeur.
 * **[Fonctionnalité 2]** : Ce que l'utilisateur peut accomplir.
 * **[Fonctionnalité 3]** : Un autre point fort du système.
 
-## 🛠️ Stack Technique
+## 🛠️ Stack Technique :
 | Secteur | Technologie |
 | :--- | :--- |
 | **Backend** | [Ex: Node.js / Python] |
@@ -22,7 +22,7 @@
 
 ---
 
-## 🚀 Installation & Setup
+## 🚀 Installation & Setup :
 
 L'installation est conçue pour être "Zero-Config". Toutes les dépendances sont isolées dans des conteneurs.
 
